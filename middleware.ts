@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { jwtVerify } from "jose";
 
-const SESSION_COOKIE = "nadiron_session";
+const SESSION_COOKIE = "erase_friction_session";
 
 function sessionKey(): Uint8Array {
   const secret = process.env.SESSION_SECRET;

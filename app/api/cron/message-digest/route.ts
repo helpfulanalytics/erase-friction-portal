@@ -81,9 +81,9 @@ export async function POST(request: Request) {
       .join("");
 
     await resend.emails.send({
-      from: "Nadiron <noreply@nadiron.com>",
+      from: "Erase Friction <noreply@Erase Friction.com>",
       to: email,
-      subject: `Your Nadiron messages (${fresh.length})`,
+      subject: `Your Erase Friction messages (${fresh.length})`,
       html: `
         <div style="margin:0;padding:28px;background:#ffffff;color:#09090b;font-family:ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial;">
           <div style="max-width:560px;margin:0 auto;border:2px solid #000;border-radius:18px;box-shadow:6px 6px 0px 0px #000;padding:20px;">

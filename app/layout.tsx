@@ -36,7 +36,7 @@ const headingAltFont = Outfit({
 });
 
 export const metadata: Metadata = {
-  title: "Nadiron Client Portal",
+  title: "Erase Friction Client Portal",
   description: "Your projects, documents, and updates — all in one place.",
 };
 

@@ -86,10 +86,10 @@ export default function AcceptInvitePage() {
       <div className="w-full max-w-sm rounded-xl border border-border bg-surface p-8 shadow-card">
         <div className="mb-8 flex items-center gap-2.5">
           <span className="shrink-0 inline-flex items-center justify-center h-10 w-10 border-2 border-ink rounded-xl bg-brand shadow-[4px_4px_0_0_#000]">
-            <Image src="/logo-black.svg" alt="Nadiron" width={28} height={28} />
+            <Image src="/logo-black.svg" alt="Erase Friction" width={28} height={28} />
           </span>
           <span className="font-heading font-bold text-2xl tracking-tighter text-ink leading-none">
-            Nadiron
+            Erase Friction
           </span>
         </div>
 

@@ -1,8 +1,8 @@
-# Nadiron Portal — Invite-Only Authentication Implementation Plan
+# Erase Friction Portal — Invite-Only Authentication Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Add invite-only Firebase Auth (email magic link) to the Nadiron portal, with two roles (ADMIN/CLIENT), JWT session cookies, Next.js middleware protection, and a complete invite flow via Resend email.
+**Goal:** Add invite-only Firebase Auth (email magic link) to the Erase Friction portal, with two roles (ADMIN/CLIENT), JWT session cookies, Next.js middleware protection, and a complete invite flow via Resend email.
 
 **Architecture:** Admin creates an invite → Resend sends a magic link → user accepts at `/invite/[token]` → Firebase custom token exchange → session JWT cookie → middleware protects `/dashboard/*` and `/admin/*`. All Firebase Admin SDK usage is in Node.js Route Handlers; Edge middleware uses only `jose` for JWT verification.
 
@@ -61,7 +61,7 @@ types/models.ts                        # Extended with Invite + SessionPayload
 - [ ] **Step 1: Install resend**
 
 ```bash
-cd /Users/tosin/Documents/Nadiron/Nadiron/document-editor && npm install resend
+cd /Users/tosin/Documents/Erase Friction/Erase Friction/document-editor && npm install resend
 ```
 
 - [ ] **Step 2: Add env vars to .env.local**
@@ -198,7 +198,7 @@ git commit -m "feat: add Invite, SessionPayload, InviteTokenPayload types"
 import { SignJWT, jwtVerify } from "jose";
 import type { SessionPayload, InviteTokenPayload } from "@/types/models";
 
-export const SESSION_COOKIE_NAME    = "nadiron_session";
+export const SESSION_COOKIE_NAME    = "Erase Friction_session";
 export const SESSION_COOKIE_MAX_AGE = 60 * 60 * 24 * 7; // 7 days in seconds
 
 // ─── Session tokens ───────────────────────────────────────────────────────────
@@ -329,12 +329,12 @@ export async function POST(request: Request) {
   const acceptUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}/invite/${token}`;
 
   await resend.emails.send({
-    from:    "Nadiron <noreply@nadiron.com>",
+    from:    "Erase Friction <noreply@Erase Friction.com>",
     to:      body.email,
-    subject: "You've been invited to Nadiron",
+    subject: "You've been invited to Erase Friction",
     html: `
       <p>Hi ${body.name},</p>
-      <p>You've been invited to access the Nadiron client portal.</p>
+      <p>You've been invited to access the Erase Friction client portal.</p>
       <p><a href="${acceptUrl}" style="background:#B9FF66;color:#09090b;padding:10px 20px;border-radius:6px;text-decoration:none;font-weight:600;">Accept Invite</a></p>
       <p>This link expires in 72 hours.</p>
     `,
@@ -587,7 +587,7 @@ git commit -m "feat: add POST /api/auth/session and POST /api/auth/signout route
 import { NextRequest, NextResponse } from "next/server";
 import { jwtVerify } from "jose";
 
-const SESSION_COOKIE = "nadiron_session";
+const SESSION_COOKIE = "Erase Friction_session";
 
 function sessionKey(): Uint8Array {
   const secret = process.env.SESSION_SECRET;
@@ -794,7 +794,7 @@ export default function AcceptInvitePage() {
             <span className="text-xs font-bold text-ink">N</span>
           </div>
           <span className="font-heading font-extrabold text-lg tracking-tight text-ink">
-            nadiron
+            Erase Friction
           </span>
         </div>
 
@@ -884,7 +884,7 @@ export default function SignInPage() {
   useEffect(() => {
     if (!isSignInWithEmailLink(auth, window.location.href)) return;
 
-    const storedEmail = window.localStorage.getItem("nadiron_signin_email");
+    const storedEmail = window.localStorage.getItem("Erase Friction_signin_email");
     if (!storedEmail) {
       setErrorMsg("Email not found. Please request a new sign-in link.");
       setStage("error");
@@ -894,7 +894,7 @@ export default function SignInPage() {
     setStage("verifying");
     signInWithEmailLink(auth, storedEmail, window.location.href)
       .then(async (credential) => {
-        window.localStorage.removeItem("nadiron_signin_email");
+        window.localStorage.removeItem("Erase Friction_signin_email");
         const idToken = await getIdToken(credential.user);
         await fetch("/api/auth/session", {
           method:  "POST",
@@ -918,7 +918,7 @@ export default function SignInPage() {
         url:             `${window.location.origin}/auth/signin?callbackUrl=${encodeURIComponent(callbackUrl)}`,
         handleCodeInApp: true,
       });
-      window.localStorage.setItem("nadiron_signin_email", email);
+      window.localStorage.setItem("Erase Friction_signin_email", email);
       setStage("sent");
     } catch (err) {
       setErrorMsg(err instanceof Error ? err.message : "Failed to send link.");
@@ -943,7 +943,7 @@ export default function SignInPage() {
               <span className="text-xs font-bold text-ink">N</span>
             </div>
             <span className="font-heading font-extrabold text-lg tracking-tight text-ink">
-              nadiron
+              Erase Friction
             </span>
           </div>
           <h1 className="mb-1 text-xl font-bold text-ink">Check your email</h1>
@@ -964,7 +964,7 @@ export default function SignInPage() {
             <span className="text-xs font-bold text-ink">N</span>
           </div>
           <span className="font-heading font-extrabold text-lg tracking-tight text-ink">
-            nadiron
+            Erase Friction
           </span>
         </div>
 
@@ -1015,7 +1015,7 @@ export default function SignInPage() {
 import type { Metadata } from "next";
 import Link from "next/link";
 
-export const metadata: Metadata = { title: "Auth Error — Nadiron" };
+export const metadata: Metadata = { title: "Auth Error — Erase Friction" };
 
 export default function AuthErrorPage() {
   return (
@@ -1026,7 +1026,7 @@ export default function AuthErrorPage() {
             <span className="text-xs font-bold text-ink">N</span>
           </div>
           <span className="font-heading font-extrabold text-lg tracking-tight text-ink">
-            nadiron
+            Erase Friction
           </span>
         </div>
         <h1 className="mb-1 text-xl font-bold text-ink">Authentication error</h1>
@@ -1164,7 +1164,7 @@ This task is manual configuration, not code. Document for the developer.
 
   Firebase Console → Authentication → Settings → Authorized domains:
   - `localhost`
-  - `clients.nadiron.co`
+  - `clients.Erase Friction.co`
 
 - [ ] **Step 3: Create Firestore security rules**
 
@@ -1220,7 +1220,7 @@ This task is manual configuration, not code. Document for the developer.
 - [ ] **Step 5: Final build verification**
 
 ```bash
-cd /Users/tosin/Documents/Nadiron/Nadiron/document-editor && \
+cd /Users/tosin/Documents/Erase Friction/Erase Friction/document-editor && \
 npx tsc --noEmit && npm run build
 ```
 

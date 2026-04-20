@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import AdminDocEditor from "./page-client";
 
-export const metadata: Metadata = { title: "Edit document — Nadiron Admin" };
+export const metadata: Metadata = { title: "Edit document — Erase Friction Admin" };
 
 export default async function AdminDocEditPage({
   params,

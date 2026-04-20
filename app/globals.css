@@ -167,10 +167,10 @@
 
 :root {
   --highlight: oklch(0.852 0.199 91.936);
-  --brand: oklch(0.906 0.215 130.8); /* #B9FF66 lime */ --destructive-foreground: var(--color-red-800); --success: var(--color-emerald-500); --success-foreground: var(--color-emerald-900); --info: var(--color-violet-500); --info-foreground: var(--color-violet-900); --warning: var(--color-yellow-500); --warning-foreground: var(--color-yellow-900); --invert: var(--color-zinc-900); --invert-foreground: var(--color-zinc-50);
+  --brand: oklch(0.78 0.17 74); /* #f59e0b amber */ --destructive-foreground: var(--color-red-800); --success: var(--color-emerald-500); --success-foreground: var(--color-emerald-900); --info: var(--color-violet-500); --info-foreground: var(--color-violet-900); --warning: var(--color-yellow-500); --warning-foreground: var(--color-yellow-900); --invert: var(--color-zinc-900); --invert-foreground: var(--color-zinc-50);
 }
 
 .dark {
   --highlight: oklch(0.852 0.199 91.936);
-  --brand: oklch(0.906 0.215 130.8); /* #B9FF66 lime */ --destructive-foreground: var(--color-red-600); --success: var(--color-emerald-500); --success-foreground: var(--color-emerald-600); --info: var(--color-violet-500); --info-foreground: var(--color-violet-600); --warning: var(--color-yellow-500); --warning-foreground: var(--color-yellow-600); --invert: var(--color-zinc-700); --invert-foreground: var(--color-zinc-50);
+  --brand: oklch(0.78 0.17 74); /* #f59e0b amber */ --destructive-foreground: var(--color-red-600); --success: var(--color-emerald-500); --success-foreground: var(--color-emerald-600); --info: var(--color-violet-500); --info-foreground: var(--color-violet-600); --warning: var(--color-yellow-500); --warning-foreground: var(--color-yellow-600); --invert: var(--color-zinc-700); --invert-foreground: var(--color-zinc-50);
 }

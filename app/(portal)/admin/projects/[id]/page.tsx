@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import AdminProjectOverview from "./page-client";
 
-export const metadata: Metadata = { title: "Project — Nadiron Admin" };
+export const metadata: Metadata = { title: "Project — Erase Friction Admin" };
 
 export default async function AdminProjectPage({
   params,

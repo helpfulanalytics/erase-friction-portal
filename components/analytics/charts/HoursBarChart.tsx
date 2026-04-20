@@ -49,7 +49,7 @@ export function HoursBarChart({ data }: { data: Row[] }) {
           tick={{ fontSize: 12, fontFamily: "var(--font-ui, ui-sans-serif)" }}
         />
         <Tooltip content={<TooltipContent />} cursor={{ fill: "rgba(0,0,0,0.03)" }} />
-        <Bar dataKey="hours" fill="#B9FF66" radius={[6, 6, 6, 6]}>
+        <Bar dataKey="hours" fill="#f59e0b" radius={[6, 6, 6, 6]}>
           <LabelList
             dataKey="hours"
             position="right"

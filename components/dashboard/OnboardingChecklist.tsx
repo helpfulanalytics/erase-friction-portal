@@ -30,7 +30,7 @@ function ProgressRing({ percent }: { percent: number }) {
         cy="32"
         r={r}
         fill="none"
-        stroke="#B9FF66"
+        stroke="#f59e0b"
         strokeWidth="8"
         strokeLinecap="round"
         strokeDasharray={c}

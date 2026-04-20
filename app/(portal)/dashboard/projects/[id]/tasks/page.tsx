@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { TasksBoard } from "@/components/tasks/TasksBoard";
 
-export const metadata: Metadata = { title: "Tasks — Nadiron" };
+export const metadata: Metadata = { title: "Tasks — Erase Friction" };
 
 export default async function ClientTasksPage({
   params,

@@ -34,9 +34,9 @@ export function ActivityAreaChart({ data }: { data: Row[] }) {
     <ResponsiveContainer width="100%" height="100%">
       <AreaChart data={cleaned} margin={{ left: 8, right: 16, top: 8, bottom: 8 }}>
         <defs>
-          <linearGradient id="limeFill" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#B9FF66" stopOpacity={0.2} />
-            <stop offset="100%" stopColor="#B9FF66" stopOpacity={0.02} />
+          <linearGradient id="brandFill" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#f59e0b" stopOpacity={0.2} />
+            <stop offset="100%" stopColor="#f59e0b" stopOpacity={0.02} />
           </linearGradient>
         </defs>
         <CartesianGrid horizontal={false} vertical={false} stroke="transparent" />
@@ -56,8 +56,8 @@ export function ActivityAreaChart({ data }: { data: Row[] }) {
         <Area
           type="monotone"
           dataKey="count"
-          stroke="#B9FF66"
-          fill="url(#limeFill)"
+          stroke="#f59e0b"
+          fill="url(#brandFill)"
           strokeWidth={2}
           dot={false}
           isAnimationActive={false}

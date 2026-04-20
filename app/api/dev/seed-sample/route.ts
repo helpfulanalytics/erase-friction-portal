@@ -73,7 +73,7 @@ export async function POST() {
     const docRef = docsCol.doc();
     const doc: Document = {
       projectId,
-      title: "Welcome to Nadiron",
+      title: "Welcome to Erase Friction",
       type: "CLIENT_VISIBLE",
       status: "REVIEW",
       version: 1,

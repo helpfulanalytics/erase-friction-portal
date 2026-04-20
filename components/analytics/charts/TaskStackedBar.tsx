@@ -74,7 +74,7 @@ export function TaskStackedBar({ data }: { data: Row[] }) {
         <Bar dataKey="todo" stackId="a" name="Todo" fill="#e4e4e7" radius={[0, 0, 0, 0]} />
         <Bar dataKey="inProgress" stackId="a" name="In Progress" fill="#a1a1aa" radius={[0, 0, 0, 0]} />
         <Bar dataKey="inReview" stackId="a" name="In Review" fill="#f59e0b" radius={[0, 0, 0, 0]} />
-        <Bar dataKey="done" stackId="a" name="Done" fill="#B9FF66" radius={[6, 6, 0, 0]} />
+        <Bar dataKey="done" stackId="a" name="Done" fill="#f59e0b" radius={[6, 6, 0, 0]} />
       </BarChart>
     </ResponsiveContainer>
   );

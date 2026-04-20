@@ -146,7 +146,7 @@ export default function ClientDocViewer({ docId }: { docId: string }) {
             particleCount: 120,
             spread: 70,
             origin: { y: 0.75 },
-            colors: ["#B9FF66", "#09090b", "#ffffff"],
+            colors: ["#f59e0b", "#09090b", "#ffffff"],
           });
         }}
       />
@@ -155,7 +155,7 @@ export default function ClientDocViewer({ docId }: { docId: string }) {
         <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-surface/95 backdrop-blur">
           <div className="mx-auto flex max-w-[1100px] flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="font-headingAlt text-sm text-ink">
-              <span className="font-semibold">Nadiron</span> is requesting your approval on this document.
+              <span className="font-semibold">Erase Friction</span> is requesting your approval on this document.
             </div>
             <button
               type="button"

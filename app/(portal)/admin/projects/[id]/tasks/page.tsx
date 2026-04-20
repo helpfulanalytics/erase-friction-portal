@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { TasksBoard } from "@/components/tasks/TasksBoard";
 
-export const metadata: Metadata = { title: "Tasks — Nadiron Admin" };
+export const metadata: Metadata = { title: "Tasks — Erase Friction Admin" };
 
 export default async function AdminTasksPage({
   params,

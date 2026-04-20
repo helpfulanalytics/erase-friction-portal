@@ -16,7 +16,7 @@ export function MilestoneDonut({
 }) {
   const data = React.useMemo(
     () => [
-      { name: "Done", value: done, color: "#B9FF66" },
+      { name: "Done", value: done, color: "#f59e0b" },
       { name: "In Progress", value: inProgress, color: "#a1a1aa" }, // zinc-400
       { name: "Pending", value: pending, color: "#e4e4e7" }, // zinc-200-ish
     ],

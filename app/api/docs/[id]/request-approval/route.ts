@@ -77,7 +77,7 @@ export async function POST(
       await Promise.all(
         clients.map((c) =>
           resend.emails.send({
-            from: "Nadiron <noreply@nadiron.com>",
+            from: "Erase Friction <noreply@Erase Friction.com>",
             to: c.email,
             subject: `Approval requested: ${docTitle}`,
             html: `
@@ -87,7 +87,7 @@ export async function POST(
                   <div style="font-size:14px;line-height:1.6;color:#52525b;margin-bottom:14px;">
                     ${session.email} requested your approval for <strong>${docTitle}</strong>.
                   </div>
-                  <a href="${viewUrl}" style="display:inline-block;background:#B9FF66;color:#09090b;text-decoration:none;font-weight:800;border:2px solid #000;border-radius:14px;box-shadow:6px 6px 0px 0px #000;padding:12px 16px;">
+                  <a href="${viewUrl}" style="display:inline-block;background:#f59e0b;color:#09090b;text-decoration:none;font-weight:800;border:2px solid #000;border-radius:14px;box-shadow:6px 6px 0px 0px #000;padding:12px 16px;">
                     Review document
                   </a>
                 </div>

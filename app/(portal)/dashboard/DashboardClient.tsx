@@ -149,7 +149,7 @@ export default function DashboardClient() {
   return (
     <div className="space-y-6">
       {/* 1. Welcome hero */}
-      <section className="relative overflow-hidden rounded-2xl bg-[#B9FF66] px-6 py-7">
+      <section className="relative overflow-hidden rounded-2xl bg-brand px-6 py-7">
         {/* subtle grid texture */}
         <div
           aria-hidden
@@ -416,7 +416,7 @@ export default function DashboardClient() {
               return (
                 <ActivityFeedItem
                   key={e.id}
-                  name={e.actorName ?? "Nadiron"}
+                  name={e.actorName ?? "Erase Friction"}
                   description={e.description ?? (e.type ? String(e.type).toLowerCase().replaceAll("_", " ") : "updated")}
                   when={created ? formatDistanceToNowStrict(created, { addSuffix: true }) : "just now"}
                 />

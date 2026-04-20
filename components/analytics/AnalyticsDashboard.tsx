@@ -138,7 +138,7 @@ export function AnalyticsDashboard() {
                 onClick={() => setPreset(o.id as RangePreset)}
                 className={cn(
                   "h-9 rounded-lg px-3 font-ui text-xs font-semibold transition-colors",
-                  preset === o.id ? "bg-[#B9FF66] text-zinc-900" : "text-zinc-600 hover:bg-zinc-50"
+                  preset === o.id ? "bg-brand text-zinc-900" : "text-zinc-600 hover:bg-zinc-50"
                 )}
               >
                 {o.label}

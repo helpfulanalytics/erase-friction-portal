@@ -23,7 +23,7 @@ function usePageLabel(): string {
   for (const [route, label] of Object.entries(ROUTE_LABELS)) {
     if (pathname === route || pathname.startsWith(route + "/")) return label;
   }
-  return "Nadiron";
+  return "Erase Friction";
 }
 
 export default function PortalNav() {

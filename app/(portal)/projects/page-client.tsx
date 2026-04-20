@@ -34,7 +34,7 @@ function statusBadge(status: string) {
     case "ARCHIVED":
       return { label: "Archived", cls: "border-zinc-300 bg-zinc-50 text-zinc-600" };
     default:
-      return { label: "Active", cls: "border-[#B9FF66]/60 bg-[#B9FF66]/10 text-[#3a6600]" };
+      return { label: "Active", cls: "border-brand/60 bg-brand/10 text-amber-900" };
   }
 }
 
@@ -85,10 +85,9 @@ export default function ProjectsClient() {
               <Link
                 key={p.id}
                 href={`/dashboard/docs?projectId=${p.id}`}
-                className="group relative flex flex-col overflow-hidden rounded-xl border border-border bg-surface shadow-card transition-all duration-150 hover:border-[#B9FF66]/40 hover:shadow-md"
+                className="group relative flex flex-col overflow-hidden rounded-xl border border-border bg-surface shadow-card transition-all duration-150 hover:border-brand/40 hover:shadow-md"
               >
-                {/* Lime top accent */}
-                <span className="absolute inset-x-0 top-0 h-[3px] bg-[#B9FF66] opacity-0 transition-opacity duration-150 group-hover:opacity-100" />
+                <span className="absolute inset-x-0 top-0 h-[3px] bg-brand opacity-0 transition-opacity duration-150 group-hover:opacity-100" />
 
                 <div className="flex flex-1 flex-col gap-3 p-5">
                   <div className="flex items-start justify-between gap-2">

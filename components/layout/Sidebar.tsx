@@ -196,11 +196,11 @@ function CompactTimer({
           <span
             className={cn(
               "size-2 rounded-full transition-colors",
-              running ? "bg-[#B9FF66]" : "bg-white/20",
+              running ? "bg-brand" : "bg-white/20",
             )}
           />
           {running && (
-            <span className="absolute size-2 animate-ping rounded-full bg-[#B9FF66]/50" />
+            <span className="absolute size-2 animate-ping rounded-full bg-brand/50" />
           )}
         </span>
 
@@ -235,11 +235,11 @@ function CompactTimer({
           <span
             className={cn(
               "size-2 rounded-full",
-              running ? "bg-[#B9FF66]" : "bg-zinc-700",
+              running ? "bg-brand" : "bg-zinc-700",
             )}
           />
           {running && (
-            <span className="absolute size-2 animate-ping rounded-full bg-[#B9FF66]/40" />
+            <span className="absolute size-2 animate-ping rounded-full bg-brand/40" />
           )}
           <span className="font-mono text-2xl tabular-nums text-white">
             {formatHMS(elapsed)}
@@ -290,7 +290,7 @@ function CompactTimer({
             "mt-3 flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg py-2 text-[13px] font-semibold transition-all duration-150",
             running
               ? "bg-red-500/15 text-red-400 hover:bg-red-500/25"
-              : "bg-[#B9FF66] text-black hover:bg-[#c8ff80]",
+              : "bg-brand text-black hover:opacity-90",
           )}
         >
           {running ? (
@@ -343,7 +343,7 @@ function SidebarItem({
       >
         {/* Active bar */}
         {(isActive || anyChildActive) && depth === 0 && (
-          <span className="absolute left-0 top-1/2 h-4 w-[3px] -translate-y-1/2 rounded-r-full bg-[#B9FF66]" />
+          <span className="absolute left-0 top-1/2 h-4 w-[3px] -translate-y-1/2 rounded-r-full bg-brand" />
         )}
 
         <item.icon
@@ -511,10 +511,10 @@ export default function Sidebar({
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 108.62 108.78"
-            aria-label="Nadiron"
-            className="size-6 shrink-0 drop-shadow-[0_0_6px_rgba(185,255,102,0.35)]"
+            aria-label="Erase Friction"
+            className="size-6 shrink-0 drop-shadow-[0_0_6px_rgba(245,158,11,0.35)]"
           >
-            <path fill="#B9FF66" d="M108.62,94.22c0,1.52,0,3.04-.22,4.56-.54,5-4.67,9.99-9.56,9.99h-26.72c-10.75,0-12.93-11.51-8.69-17.92,1.09-1.63,7.49-9.34,12.82-15.53,4.13-5,3.15-12.82-3.8-14.99-5.54-1.74-10.64.65-12.71,6.41-1.19,3.48-2.17,7.06-3.04,10.64-1.63,6.41-3.04,12.82-4.67,19.23-2.93,11.08-7.49,12.06-15.97,12.06H11.19c-2.06,0-4.13-.76-5.87-1.96-3.37-2.28-5.32-6.3-5.32-10.43v-48.01c0-6.41,2.82-11.84,9.02-13.36,3.58-.87,8.69.11,13.47,3.91,12.93,10.32,16.84,13.69,22.81,10.97,7.6-3.48,8.36-15.21-4.34-18.68-13.47-3.69-28.57-7.6-31.39-8.36-2.82-.76-5.32-2.17-7.17-4.56C-1.85,12.87-.22,5.15,5.76,2.11,8.26.81,10.97.16,13.69.05,19.66-.06,35.95.05,38.13.05c1.19,0,2.28.11,3.48.22,3.48.54,6.08,2.28,8.04,5.43,1.85,3.15,2.72,6.63,3.58,10.1,1.41,5.65,2.61,11.41,4.02,17.16.76,3.04,1.52,6.08,2.5,9.02.76,2.17,1.96,4.24,3.8,5.65,4.78,3.58,11.19,1.96,14.12-3.58,1.3-2.17,4.34-16.29,7.93-31.72.87-3.91,2.17-7.39,5.43-9.78,5.87-4.45,12.71-1.41,14.99,2.5.87,1.41,1.52,3.04,1.74,4.67.43,2.82.76,5.54.76,8.36.11,23.14.11,65.28.11,76.14Z"/>
+            <path fill="#f59e0b" d="M108.62,94.22c0,1.52,0,3.04-.22,4.56-.54,5-4.67,9.99-9.56,9.99h-26.72c-10.75,0-12.93-11.51-8.69-17.92,1.09-1.63,7.49-9.34,12.82-15.53,4.13-5,3.15-12.82-3.8-14.99-5.54-1.74-10.64.65-12.71,6.41-1.19,3.48-2.17,7.06-3.04,10.64-1.63,6.41-3.04,12.82-4.67,19.23-2.93,11.08-7.49,12.06-15.97,12.06H11.19c-2.06,0-4.13-.76-5.87-1.96-3.37-2.28-5.32-6.3-5.32-10.43v-48.01c0-6.41,2.82-11.84,9.02-13.36,3.58-.87,8.69.11,13.47,3.91,12.93,10.32,16.84,13.69,22.81,10.97,7.6-3.48,8.36-15.21-4.34-18.68-13.47-3.69-28.57-7.6-31.39-8.36-2.82-.76-5.32-2.17-7.17-4.56C-1.85,12.87-.22,5.15,5.76,2.11,8.26.81,10.97.16,13.69.05,19.66-.06,35.95.05,38.13.05c1.19,0,2.28.11,3.48.22,3.48.54,6.08,2.28,8.04,5.43,1.85,3.15,2.72,6.63,3.58,10.1,1.41,5.65,2.61,11.41,4.02,17.16.76,3.04,1.52,6.08,2.5,9.02.76,2.17,1.96,4.24,3.8,5.65,4.78,3.58,11.19,1.96,14.12-3.58,1.3-2.17,4.34-16.29,7.93-31.72.87-3.91,2.17-7.39,5.43-9.78,5.87-4.45,12.71-1.41,14.99,2.5.87,1.41,1.52,3.04,1.74,4.67.43,2.82.76,5.54.76,8.36.11,23.14.11,65.28.11,76.14Z"/>
           </svg>
           <span
             className={cn(
@@ -522,7 +522,7 @@ export default function Sidebar({
               isExpanded ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-2 pointer-events-none w-0",
             )}
           >
-            Nadiron
+            Erase Friction
           </span>
         </div>
 
@@ -548,8 +548,8 @@ export default function Sidebar({
                 "group flex w-full cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 transition-colors duration-150 hover:bg-white/[0.05] focus-visible:outline-none",
               )}
             >
-              <span className="flex size-5 shrink-0 items-center justify-center rounded-md bg-[#B9FF66]/15 ring-1 ring-[#B9FF66]/20">
-                <span className="size-2 rounded-sm bg-[#B9FF66]" />
+              <span className="flex size-5 shrink-0 items-center justify-center rounded-md bg-brand/15 ring-1 ring-brand/20">
+                <span className="size-2 rounded-sm bg-brand" />
               </span>
               <span
                 className={cn(
@@ -580,8 +580,8 @@ export default function Sidebar({
                     key={p.id}
                     className="cursor-pointer gap-2 rounded-md px-2 py-1.5 text-[13px] text-zinc-300 focus:bg-white/[0.06]"
                   >
-                    <span className="flex size-4 shrink-0 items-center justify-center rounded bg-[#B9FF66]/15 ring-1 ring-[#B9FF66]/20">
-                      <span className="size-1.5 rounded-sm bg-[#B9FF66]" />
+                    <span className="flex size-4 shrink-0 items-center justify-center rounded bg-brand/15 ring-1 ring-brand/20">
+                      <span className="size-1.5 rounded-sm bg-brand" />
                     </span>
                     {p.name}
                   </DropdownMenuItem>

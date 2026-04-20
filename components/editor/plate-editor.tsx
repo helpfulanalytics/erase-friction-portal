@@ -31,7 +31,7 @@ export function PlateEditor({
   );
 
   const editor = usePlateEditor({
-    id: documentId ?? 'nadiron-plate',
+    id: documentId ?? 'erase-friction-plate',
     plugins: EditorKit,
     value: normalized,
   });

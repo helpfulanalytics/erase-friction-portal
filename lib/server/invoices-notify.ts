@@ -51,7 +51,7 @@ export async function notifyInvoiceSent(args: {
     await Promise.all(
       clients.map((c) =>
         resend.emails.send({
-          from: "Nadiron <noreply@nadiron.com>",
+          from: "Erase Friction <noreply@Erase Friction.com>",
           to: c.email,
           subject: "Invoice sent",
           html: `
@@ -59,9 +59,9 @@ export async function notifyInvoiceSent(args: {
               <div style="max-width:560px;margin:0 auto;border:2px solid #000;border-radius:18px;box-shadow:6px 6px 0px 0px #000;padding:20px;">
                 <div style="font-size:18px;font-weight:800;letter-spacing:-0.02em;margin-bottom:6px;">Invoice sent</div>
                 <div style="font-size:14px;line-height:1.6;color:#52525b;margin-bottom:14px;">
-                  A new invoice is available in your Nadiron portal.
+                  A new invoice is available in your Erase Friction portal.
                 </div>
-                <a href="${viewUrl}" style="display:inline-block;background:#B9FF66;color:#09090b;text-decoration:none;font-weight:800;border:2px solid #000;border-radius:14px;box-shadow:6px 6px 0px 0px #000;padding:12px 16px;">
+                <a href="${viewUrl}" style="display:inline-block;background:#f59e0b;color:#09090b;text-decoration:none;font-weight:800;border:2px solid #000;border-radius:14px;box-shadow:6px 6px 0px 0px #000;padding:12px 16px;">
                   View invoice
                 </a>
               </div>

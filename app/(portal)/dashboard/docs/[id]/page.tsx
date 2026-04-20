@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import ClientDocViewer from "./page-client";
 
-export const metadata: Metadata = { title: "Document — Nadiron" };
+export const metadata: Metadata = { title: "Document — Erase Friction" };
 
 export default async function DocViewPage({
   params,

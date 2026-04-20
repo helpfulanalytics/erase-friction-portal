@@ -16,7 +16,7 @@ function emailBaseStyles() {
       'ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, "Apple Color Emoji", "Segoe UI Emoji"',
     textColor: "#09090b",
     muted: "#52525b",
-    brand: "#B9FF66",
+    brand: "#f59e0b",
     border: "#000000",
     bg: "#ffffff",
     shadow: "6px 6px 0px 0px #000000",
@@ -60,9 +60,9 @@ export async function POST(request: Request) {
 
   const resend = new Resend(resendApiKey);
   await resend.emails.send({
-    from: "Nadiron <noreply@nadiron.com>",
+    from: "Erase Friction <noreply@Erase Friction.com>",
     to: email,
-    subject: "Your sign-in link for Nadiron",
+    subject: "Your sign-in link for Erase Friction",
     html: `
       <div style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent;">
         ${previewText}
@@ -72,10 +72,10 @@ export async function POST(request: Request) {
         <div style="max-width:560px;margin:0 auto;">
           <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
             <div style="width:44px;height:44px;border:2px solid ${s.border};border-radius:14px;background:${s.brand};box-shadow:${s.shadow};display:flex;align-items:center;justify-content:center;">
-              <img src="${logoUrl}" width="28" height="28" alt="Nadiron" style="display:block;" />
+              <img src="${logoUrl}" width="28" height="28" alt="Erase Friction" style="display:block;" />
             </div>
             <div style="font-size:22px;font-weight:800;letter-spacing:-0.03em;line-height:1;color:${s.textColor};">
-              Nadiron
+              Erase Friction
             </div>
           </div>
 

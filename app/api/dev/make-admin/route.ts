@@ -25,7 +25,7 @@ export async function POST(request: Request) {
     email,
     name: body.name?.trim() || email,
     role: "ADMIN",
-    company: body.company?.trim() || "Nadiron",
+    company: body.company?.trim() || "Erase Friction",
     avatar: "",
     createdAt: now,
   };

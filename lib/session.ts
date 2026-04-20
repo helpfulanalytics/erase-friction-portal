@@ -1,7 +1,7 @@
 import { SignJWT, jwtVerify } from "jose";
 import type { SessionPayload, InviteTokenPayload, MagicLinkTokenPayload } from "@/types/models";
 
-export const SESSION_COOKIE_NAME    = "nadiron_session";
+export const SESSION_COOKIE_NAME    = "erase_friction_session";
 export const SESSION_COOKIE_MAX_AGE = 60 * 60 * 24 * 7; // 7 days in seconds
 
 // ─── Session tokens ───────────────────────────────────────────────────────────

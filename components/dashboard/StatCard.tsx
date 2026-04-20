@@ -22,7 +22,7 @@ export function StatCard({
 }) {
   return (
     <div className="relative overflow-hidden rounded-xl border border-border bg-surface p-5 shadow-card">
-      <span className="absolute left-0 top-4 h-7 w-[3px] rounded-r-full bg-[#B9FF66]" />
+      <span className="absolute left-0 top-4 h-7 w-[3px] rounded-r-full bg-brand" />
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="font-ui text-[11px] font-semibold tracking-widest uppercase text-muted-foreground">

@@ -11,7 +11,7 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        brand:   "#B9FF66",
+        brand:   "#f59e0b",
         ink:     "#09090b",
         surface: "#ffffff",
         page:    "#f8f9fb",

@@ -34,7 +34,7 @@ function statusBadge(status: string) {
     case "ARCHIVED":
       return { label: "Archived", cls: "border-zinc-300 bg-zinc-50 text-zinc-600" };
     default:
-      return { label: "Active", cls: "border-[#B9FF66]/60 bg-[#B9FF66]/10 text-[#3a6600]" };
+      return { label: "Active", cls: "border-brand/60 bg-brand/10 text-amber-900" };
   }
 }
 
