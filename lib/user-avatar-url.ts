@@ -47,3 +47,12 @@ export function resolveUserAvatarUrl(
   const stableSeed = seed.trim() || trimmed || "user";
   return dicebearAvatarUrl(stableSeed);
 }
+
+/** Shown until `/api/users/lookup` fills the discussion plugin `users` map. */
+export function fallbackDiscussionProfile(userId: string): {
+  name: string;
+  avatarUrl: string;
+} {
+  const id = userId.trim() || "user";
+  return { name: "User", avatarUrl: resolveUserAvatarUrl(undefined, id) };
+}

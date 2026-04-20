@@ -5,6 +5,7 @@ import { adminDb } from "@/lib/firebase-admin";
 import type { SessionPayload } from "@/types/models";
 import { createNotification } from "@/lib/server/notifications";
 import { logActivity } from "@/lib/server/activity-events";
+import { resendFrom } from "@/lib/resend-from";
 
 export async function notifyInvoiceSent(args: {
   invoiceId: string;
@@ -51,7 +52,7 @@ export async function notifyInvoiceSent(args: {
     await Promise.all(
       clients.map((c) =>
         resend.emails.send({
-          from: "Erase Friction <noreply@nadiron>",
+          from: resendFrom(),
           to: c.email,
           subject: "Invoice sent",
           html: `

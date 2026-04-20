@@ -8,7 +8,7 @@ import confetti from "canvas-confetti";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DocStatusBadge, DocTypeBadge } from "@/components/docs/badges";
 import { CommentSidebar } from "@/components/docs/CommentSidebar";
-import { SignatureModal } from "@/components/docs/SignatureModal";
+import { DocumentApprovalModal } from "@/components/docs/DocumentApprovalModal";
 import { PlateEditor } from "@/components/editor/plate-editor";
 
 type DocPayload = {
@@ -20,7 +20,7 @@ type DocPayload = {
     content: unknown;
     updatedAt?: number;
   };
-  signature: { id: string; signedAt?: number; userId?: string } | null;
+  signature: { id: string; signedAt?: number; userId?: string; signatureData?: string } | null;
   comments: Array<{ id: string; userId: string; body: string; resolved: boolean; createdAt?: number }>;
 };
 
@@ -57,11 +57,14 @@ export default function ClientDocViewer({ docId }: { docId: string }) {
   });
 
   const approve = useMutation({
-    mutationFn: async (signatureData: string) => {
+    mutationFn: async (payload: { typedFullName: string }) => {
       await fetchJson(`/api/docs/${docId}/approve`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ signatureData }),
+        body: JSON.stringify({
+          typedFullName: payload.typedFullName,
+          acknowledge: true,
+        }),
       });
     },
     onSuccess: async () => {
@@ -89,6 +92,8 @@ export default function ClientDocViewer({ docId }: { docId: string }) {
 
   const doc = q.data!.document;
   const showApprove = doc.status === "REVIEW" && doc.type === "CLIENT_VISIBLE";
+  const awaitingSignatureRequest =
+    doc.type === "CLIENT_VISIBLE" && doc.status === "DRAFT";
   const signedAt = q.data!.signature?.signedAt ? new Date(q.data!.signature!.signedAt!) : null;
   const signerLabel = "You";
 
@@ -105,11 +110,19 @@ export default function ClientDocViewer({ docId }: { docId: string }) {
             {doc.status === "APPROVED" && signedAt ? (
               <span className="inline-flex items-center gap-2 rounded-full border border-emerald-300 bg-emerald-50 px-2 py-0.5 font-ui text-[11px] font-semibold text-emerald-800">
                 <span className="inline-block size-2 rounded-full bg-emerald-500" />
-                Verified · Signed by {signerLabel} on {format(signedAt, "dd MMM yyyy")}
+                Approved · {signerLabel} · {format(signedAt, "dd MMM yyyy")}
               </span>
             ) : null}
           </div>
         </div>
+
+        {awaitingSignatureRequest ? (
+          <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 font-ui text-sm text-amber-950">
+            This document is not open for approval yet. When your team sends it for review, status
+            will change to <strong>Review</strong> and the <strong>Approve document</strong> action
+            will appear at the bottom.
+          </div>
+        ) : null}
 
         <div className="flex flex-wrap items-center gap-2">
           <button
@@ -135,11 +148,11 @@ export default function ClientDocViewer({ docId }: { docId: string }) {
         onResolve={async () => {}}
       />
 
-      <SignatureModal
+      <DocumentApprovalModal
         open={signOpen}
         onOpenChange={setSignOpen}
-        onConfirm={(sig) => approve.mutateAsync(sig)}
-        onSigned={() => {
+        onConfirm={(p) => approve.mutateAsync(p)}
+        onApproved={() => {
           if (signedFx) return;
           setSignedFx(true);
           confetti({
@@ -162,7 +175,7 @@ export default function ClientDocViewer({ docId }: { docId: string }) {
               onClick={() => setSignOpen(true)}
               className="inline-flex h-11 w-full items-center justify-center rounded-lg bg-brand px-4 font-ui text-sm font-semibold text-ink transition-opacity hover:opacity-90 sm:w-auto"
             >
-              Approve &amp; Sign
+              Approve document
             </button>
           </div>
         </div>

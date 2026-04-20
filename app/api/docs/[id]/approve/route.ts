@@ -7,6 +7,8 @@ import { getSessionFromCookie } from "@/lib/server/session-from-cookie";
 import { assertCanAccessDoc, getDocOr404 } from "@/lib/server/documents-access";
 import { logActivityEvent } from "@/lib/server/activity-events";
 import { createNotification } from "@/lib/server/notifications";
+import { normalizeSignerName } from "@/lib/normalize-signer-name";
+import type { User } from "@/types/models";
 
 function ipFromRequest(request: Request): string {
   const forwarded = request.headers.get("x-forwarded-for");
@@ -32,9 +34,52 @@ export async function POST(
     return NextResponse.json({ error: "Document is not ready for approval" }, { status: 409 });
   }
 
-  const body = await request.json() as { signatureData: string };
-  const signatureData = String(body.signatureData ?? "");
-  if (!signatureData) return NextResponse.json({ error: "signatureData is required" }, { status: 400 });
+  const body = (await request.json()) as {
+    typedFullName?: unknown;
+    acknowledge?: unknown;
+    signatureData?: unknown;
+  };
+
+  let signatureData: string;
+
+  const typedRaw = typeof body.typedFullName === "string" ? body.typedFullName.trim().replace(/\s+/g, " ") : "";
+  const acknowledge = body.acknowledge === true;
+
+  if (acknowledge && typedRaw.length >= 2) {
+    const userSnap = await adminDb.collection("users").doc(session.uid).get();
+    const u = userSnap.exists ? (userSnap.data() as User) : undefined;
+    const expected =
+      u?.name?.trim() ||
+      session.email?.split("@")[0]?.trim() ||
+      "";
+    if (!expected.trim()) {
+      return NextResponse.json({ error: "Account name is missing; contact support." }, { status: 400 });
+    }
+    if (normalizeSignerName(typedRaw) !== normalizeSignerName(expected)) {
+      return NextResponse.json(
+        { error: "Typed name must match your account name exactly." },
+        { status: 400 }
+      );
+    }
+    signatureData = JSON.stringify({
+      kind: "typed_ack",
+      version: 1,
+      typedFullName: typedRaw,
+    });
+  } else {
+    const legacy = typeof body.signatureData === "string" ? body.signatureData : "";
+    if (legacy.startsWith("data:image")) {
+      signatureData = legacy;
+    } else {
+      return NextResponse.json(
+        {
+          error:
+            "Send typedFullName (matching your profile) and acknowledge: true, or a data:image signature for legacy clients.",
+        },
+        { status: 400 }
+      );
+    }
+  }
 
   await adminDb.collection("signatures").add({
     documentId: docId,
@@ -50,7 +95,7 @@ export async function POST(
     projectId,
     session,
     type: "DOC_APPROVED",
-    description: "approved and signed",
+    description: "approved (typed confirmation)",
     documentId: docId,
   });
 

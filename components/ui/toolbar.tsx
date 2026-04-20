@@ -314,9 +314,11 @@ function withTooltip<T extends React.ElementType>(Component: T) {
     if (tooltip && mounted) {
       return (
         <Tooltip {...tooltipProps}>
-          <TooltipTrigger {...tooltipTriggerProps}>
-            {component}
-          </TooltipTrigger>
+          <TooltipTrigger
+            {...tooltipTriggerProps}
+            // Avoid <button><ToolbarPrimitive.Button /></button> (invalid HTML + hydration error).
+            render={component}
+          />
 
           <TooltipContent {...tooltipContentProps}>{tooltip}</TooltipContent>
         </Tooltip>

@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DocStatusBadge, DocTypeBadge } from "@/components/docs/badges";
+import { type DiscussionUsersInput } from "@/components/editor/discussion-users-bootstrap";
 import { PlateEditor } from "@/components/editor/plate-editor";
 
 type DocPayload = {
@@ -45,6 +46,32 @@ export default function AdminDocEditor({ docId }: { docId: string }) {
     queryKey: ["doc", docId, "admin"],
     queryFn: () => fetchJson<DocPayload>(`/api/docs/${docId}`),
   });
+
+  const teamQ = useQuery({
+    queryKey: ["admin", "team"],
+    queryFn: () =>
+      fetchJson<{
+        users: Array<{ id: string; name?: string; email?: string; avatar?: string }>;
+      }>("/api/admin/team"),
+    staleTime: 60_000,
+  });
+
+  const discussionUsers = React.useMemo((): DiscussionUsersInput | undefined => {
+    const rows = teamQ.data?.users;
+    if (!rows?.length) return undefined;
+    const out: DiscussionUsersInput = {};
+    for (const row of rows) {
+      const name =
+        (typeof row.name === "string" && row.name.trim()) ||
+        (typeof row.email === "string" && row.email.split("@")[0]?.trim()) ||
+        "User";
+      out[row.id] = {
+        name,
+        avatar: typeof row.avatar === "string" ? row.avatar : "",
+      };
+    }
+    return out;
+  }, [teamQ.data?.users]);
 
   const [title, setTitle] = React.useState("");
   const [type, setType] = React.useState<string>("INTERNAL");
@@ -194,6 +221,7 @@ export default function AdminDocEditor({ docId }: { docId: string }) {
           <PlateEditor
             documentId={docId}
             value={content ?? doc.content}
+            discussionUsers={discussionUsers}
             onChange={(v) => {
               setContent(v);
               setDirty(true);

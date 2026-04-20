@@ -8,6 +8,7 @@ import { getSessionFromCookie } from "@/lib/server/session-from-cookie";
 import { assertDocAdmin, assertCanAccessDoc, getDocOr404 } from "@/lib/server/documents-access";
 import { logActivityEvent } from "@/lib/server/activity-events";
 import { createNotification } from "@/lib/server/notifications";
+import { resendFrom } from "@/lib/resend-from";
 
 export async function POST(
   _request: Request,
@@ -77,7 +78,7 @@ export async function POST(
       await Promise.all(
         clients.map((c) =>
           resend.emails.send({
-            from: "Erase Friction <noreply@nadiron>",
+            from: resendFrom(),
             to: c.email,
             subject: `Approval requested: ${docTitle}`,
             html: `

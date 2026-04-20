@@ -53,7 +53,13 @@ export function EmojiToolbarButton({
   return (
     <EmojiPopover
       control={
-        <ToolbarButton pressed={isOpen} tooltip="Emoji" isDropdown {...props}>
+        <ToolbarButton
+          pressed={isOpen}
+          isDropdown
+          title="Emoji"
+          aria-label="Emoji"
+          {...props}
+        >
           <SmileIcon />
         </ToolbarButton>
       }
@@ -83,7 +89,7 @@ export function EmojiPopover({
 }) {
   return (
     <Popover.Root open={isOpen} onOpenChange={setIsOpen}>
-      <Popover.Trigger>{control}</Popover.Trigger>
+      <Popover.Trigger asChild>{control}</Popover.Trigger>
 
       <Popover.Portal>
         <Popover.Content className="z-100">{children}</Popover.Content>

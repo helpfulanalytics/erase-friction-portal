@@ -45,6 +45,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { fallbackDiscussionProfile } from '@/lib/user-avatar-url';
 import { cn } from '@/lib/utils';
 import { BasicMarksKit } from '@/components/editor/plugins/basic-marks-kit';
 import {
@@ -87,6 +88,7 @@ export function Comment(props: {
   const editor = useEditorRef();
   const userInfo = usePluginOption(discussionPlugin, 'user', comment.userId);
   const currentUserId = usePluginOption(discussionPlugin, 'currentUserId');
+  const profile = userInfo ?? fallbackDiscussionProfile(comment.userId);
 
   const resolveDiscussion = async (id: string) => {
     const updatedDiscussions = editor
@@ -187,13 +189,10 @@ export function Comment(props: {
     >
       <div className="relative flex items-center">
         <Avatar className="size-5">
-          <AvatarImage alt={userInfo?.name} src={userInfo?.avatarUrl} />
-          <AvatarFallback>{userInfo?.name?.[0]}</AvatarFallback>
+          <AvatarImage alt={profile.name} src={profile.avatarUrl} />
+          <AvatarFallback>{profile.name[0]}</AvatarFallback>
         </Avatar>
-        <h4 className="mx-2 font-semibold text-sm leading-none">
-          {/* Replace to your own backend or refer to potion */}
-          {userInfo?.name}
-        </h4>
+        <h4 className="mx-2 font-semibold text-sm leading-none">{profile.name}</h4>
 
         <div className="text-muted-foreground/80 text-xs leading-none">
           <span className="mr-1">
@@ -426,6 +425,12 @@ export function CommentCreateForm({
   const discussionId = discussionIdProp ?? commentId;
 
   const userInfo = usePluginOption(discussionPlugin, 'currentUser');
+  const currentUserId = usePluginOption(discussionPlugin, 'currentUserId');
+  const replyProfile =
+    userInfo ??
+    (currentUserId
+      ? fallbackDiscussionProfile(currentUserId)
+      : { name: 'You', avatarUrl: fallbackDiscussionProfile('').avatarUrl });
   const [commentValue, setCommentValue] = React.useState<Value | undefined>();
   const commentContent = React.useMemo(
     () =>
@@ -555,8 +560,8 @@ export function CommentCreateForm({
       <div className="mt-2 mr-1 shrink-0">
         {/* Replace to your own backend or refer to potion */}
         <Avatar className="size-5">
-          <AvatarImage alt={userInfo?.name} src={userInfo?.avatarUrl} />
-          <AvatarFallback>{userInfo?.name?.[0]}</AvatarFallback>
+          <AvatarImage alt={replyProfile.name} src={replyProfile.avatarUrl} />
+          <AvatarFallback>{replyProfile.name[0]}</AvatarFallback>
         </Avatar>
       </div>
 

@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 import { Timestamp } from "firebase-admin/firestore";
 import { Resend } from "resend";
 import { adminDb } from "@/lib/firebase-admin";
+import { resendFrom } from "@/lib/resend-from";
 
 function isAuthorized(request: Request) {
   const secret = process.env.CRON_SECRET;
@@ -81,7 +82,7 @@ export async function POST(request: Request) {
       .join("");
 
     await resend.emails.send({
-      from: "Erase Friction <noreply@nadiron>",
+      from: resendFrom(),
       to: email,
       subject: `Your Erase Friction messages (${fresh.length})`,
       html: `

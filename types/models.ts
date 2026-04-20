@@ -113,6 +113,7 @@ export interface Signature {
   documentId:     string;
   userId:         string;
   signedAt:       Timestamp;
-  signatureData:  string; // base64
+  /** Legacy: PNG data URL. New: JSON `{ kind: "typed_ack", typedFullName, version }`. */
+  signatureData:  string;
   ipAddress:      string;
 }

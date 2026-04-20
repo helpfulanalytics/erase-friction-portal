@@ -6,6 +6,7 @@ import { signInviteToken } from "@/lib/session";
 import { Resend } from "resend";
 import { Timestamp } from "firebase-admin/firestore";
 import type { Invite } from "@/types/models";
+import { resendFrom } from "@/lib/resend-from";
 
 function appUrl(): string {
   const url = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
@@ -71,7 +72,7 @@ export async function POST(request: Request) {
 
   const resend = new Resend(resendApiKey);
   await resend.emails.send({
-    from:    "Erase Friction <noreply@nadiron>",
+    from:    resendFrom(),
     to:      body.email,
     subject: "You've been invited to Erase Friction",
     html: `

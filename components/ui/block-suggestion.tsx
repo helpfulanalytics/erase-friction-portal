@@ -31,6 +31,7 @@ import {
   discussionPlugin,
 } from '@/components/editor/plugins/discussion-kit';
 import { suggestionPlugin } from '@/components/editor/plugins/suggestion-kit';
+import { fallbackDiscussionProfile } from '@/lib/user-avatar-url';
 
 import {
   type TComment,
@@ -87,6 +88,7 @@ export function BlockSuggestionCard({
   const { api, editor } = useEditorPlugin(SuggestionPlugin);
 
   const userInfo = usePluginOption(discussionPlugin, 'user', suggestion.userId);
+  const profile = userInfo ?? fallbackDiscussionProfile(suggestion.userId);
 
   const accept = (suggestion: ResolvedSuggestion) => {
     api.suggestion.withoutSuggestions(() => {
@@ -121,12 +123,10 @@ export function BlockSuggestionCard({
         <div className="relative flex items-center">
           {/* Replace to your own backend or refer to potion */}
           <Avatar className="size-5">
-            <AvatarImage alt={userInfo?.name} src={userInfo?.avatarUrl} />
-            <AvatarFallback>{userInfo?.name?.[0]}</AvatarFallback>
+            <AvatarImage alt={profile.name} src={profile.avatarUrl} />
+            <AvatarFallback>{profile.name[0]}</AvatarFallback>
           </Avatar>
-          <h4 className="mx-2 font-semibold text-sm leading-none">
-            {userInfo?.name}
-          </h4>
+          <h4 className="mx-2 font-semibold text-sm leading-none">{profile.name}</h4>
           <div className="text-muted-foreground/80 text-xs leading-none">
             <span className="mr-1">
               {formatCommentDate(new Date(suggestion.createdAt))}

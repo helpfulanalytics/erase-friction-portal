@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import { adminDb } from "@/lib/firebase-admin";
 import { signMagicLinkToken } from "@/lib/session";
+import { resendFrom } from "@/lib/resend-from";
 
 function appUrl(): string {
   const url = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
@@ -59,8 +60,8 @@ export async function POST(request: Request) {
   const previewText = "Your sign-in link is ready (expires in 15 minutes).";
 
   const resend = new Resend(resendApiKey);
-  await resend.emails.send({
-    from: "Erase Friction <noreply@nadiron>",
+  const { error: sendError } = await resend.emails.send({
+    from: resendFrom(),
     to: email,
     subject: "Your sign-in link for Erase Friction",
     html: `
@@ -107,6 +108,14 @@ export async function POST(request: Request) {
       </div>
     `,
   });
+
+  if (sendError) {
+    console.error("[magic-link] Resend:", sendError);
+    return NextResponse.json(
+      { error: sendError.message ?? "Failed to send sign-in email. Check Resend domain and RESEND_FROM_EMAIL." },
+      { status: 502 }
+    );
+  }
 
   return NextResponse.json({ success: true });
 }
