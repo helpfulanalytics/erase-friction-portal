@@ -51,7 +51,7 @@ export async function notifyInvoiceSent(args: {
     await Promise.all(
       clients.map((c) =>
         resend.emails.send({
-          from: "Erase Friction <noreply@Erase Friction.com>",
+          from: "Erase Friction <noreply@nadiron>",
           to: c.email,
           subject: "Invoice sent",
           html: `

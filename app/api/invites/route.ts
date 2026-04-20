@@ -71,7 +71,7 @@ export async function POST(request: Request) {
 
   const resend = new Resend(resendApiKey);
   await resend.emails.send({
-    from:    "Erase Friction <noreply@Erase Friction.com>",
+    from:    "Erase Friction <noreply@nadiron>",
     to:      body.email,
     subject: "You've been invited to Erase Friction",
     html: `

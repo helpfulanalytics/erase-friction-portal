@@ -77,7 +77,7 @@ export async function POST(
       await Promise.all(
         clients.map((c) =>
           resend.emails.send({
-            from: "Erase Friction <noreply@Erase Friction.com>",
+            from: "Erase Friction <noreply@nadiron>",
             to: c.email,
             subject: `Approval requested: ${docTitle}`,
             html: `

@@ -329,7 +329,7 @@ export async function POST(request: Request) {
   const acceptUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}/invite/${token}`;
 
   await resend.emails.send({
-    from:    "Erase Friction <noreply@Erase Friction.com>",
+    from:    "Erase Friction <noreply@nadiron>",
     to:      body.email,
     subject: "You've been invited to Erase Friction",
     html: `

@@ -81,7 +81,7 @@ export async function POST(request: Request) {
       .join("");
 
     await resend.emails.send({
-      from: "Erase Friction <noreply@Erase Friction.com>",
+      from: "Erase Friction <noreply@nadiron>",
       to: email,
       subject: `Your Erase Friction messages (${fresh.length})`,
       html: `
