@@ -310,10 +310,12 @@ function SidebarItem({
   item,
   isExpanded,
   depth = 0,
+  onNavigate,
 }: {
   item: NavItem;
   isExpanded: boolean;
   depth?: number;
+  onNavigate?: () => void;
 }) {
   const pathname = usePathname();
   const [open, setOpen] = React.useState(false);
@@ -332,7 +334,10 @@ function SidebarItem({
     <div>
       <Link
         href={item.href}
-        onClick={hasChildren ? (e) => { e.preventDefault(); setOpen((o) => !o); } : undefined}
+        onClick={hasChildren
+          ? (e) => { e.preventDefault(); setOpen((o) => !o); }
+          : () => { if (item.href !== pathname) onNavigate?.(); }
+        }
         className={cn(
           "group relative flex cursor-pointer items-center gap-2.5 rounded-lg py-1.5 text-[13.5px] font-medium transition-all duration-150",
           depth === 0 ? "px-2" : "pl-6 pr-2",
@@ -392,7 +397,7 @@ function SidebarItem({
         >
           <div className="mt-0.5 flex flex-col gap-0.5 pl-2">
             {item.children!.map((child) => (
-              <SidebarItem key={child.href} item={child} isExpanded={isExpanded} depth={depth + 1} />
+              <SidebarItem key={child.href} item={child} isExpanded={isExpanded} depth={depth + 1} onNavigate={onNavigate} />
             ))}
           </div>
         </div>
@@ -407,10 +412,12 @@ function SidebarSection({
   section,
   isExpanded,
   defaultOpen = true,
+  onNavigate,
 }: {
   section: NavSection;
   isExpanded: boolean;
   defaultOpen?: boolean;
+  onNavigate?: () => void;
 }) {
   const [open, setOpen] = React.useState(defaultOpen);
 
@@ -445,7 +452,7 @@ function SidebarSection({
       >
         <div className="mt-0.5 flex flex-col gap-0.5">
           {section.items.map((item) => (
-            <SidebarItem key={item.href} item={item} isExpanded={isExpanded} />
+            <SidebarItem key={item.href} item={item} isExpanded={isExpanded} onNavigate={onNavigate} />
           ))}
         </div>
       </div>
@@ -474,6 +481,17 @@ export default function Sidebar({
 }: SidebarProps) {
   const [hovered, setHovered] = React.useState(false);
   const [pinned,  setPinned]  = React.useState(false);
+  const [isNavigating, setIsNavigating] = React.useState(false);
+
+  const pathname = usePathname();
+  const prevPathnameRef = React.useRef(pathname);
+
+  React.useEffect(() => {
+    if (prevPathnameRef.current !== pathname) {
+      prevPathnameRef.current = pathname;
+      setIsNavigating(false);
+    }
+  }, [pathname]);
 
   const isExpanded = pinned || hovered;
 
@@ -512,7 +530,10 @@ export default function Sidebar({
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 108.62 108.78"
             aria-label="Erase Friction"
-            className="size-6 shrink-0 drop-shadow-[0_0_6px_rgba(245,158,11,0.35)]"
+            className={cn(
+              "size-6 shrink-0",
+              isNavigating ? "logo-loading" : "drop-shadow-[0_0_6px_rgba(245,158,11,0.35)]",
+            )}
           >
             <path fill="#f59e0b" d="M108.62,94.22c0,1.52,0,3.04-.22,4.56-.54,5-4.67,9.99-9.56,9.99h-26.72c-10.75,0-12.93-11.51-8.69-17.92,1.09-1.63,7.49-9.34,12.82-15.53,4.13-5,3.15-12.82-3.8-14.99-5.54-1.74-10.64.65-12.71,6.41-1.19,3.48-2.17,7.06-3.04,10.64-1.63,6.41-3.04,12.82-4.67,19.23-2.93,11.08-7.49,12.06-15.97,12.06H11.19c-2.06,0-4.13-.76-5.87-1.96-3.37-2.28-5.32-6.3-5.32-10.43v-48.01c0-6.41,2.82-11.84,9.02-13.36,3.58-.87,8.69.11,13.47,3.91,12.93,10.32,16.84,13.69,22.81,10.97,7.6-3.48,8.36-15.21-4.34-18.68-13.47-3.69-28.57-7.6-31.39-8.36-2.82-.76-5.32-2.17-7.17-4.56C-1.85,12.87-.22,5.15,5.76,2.11,8.26.81,10.97.16,13.69.05,19.66-.06,35.95.05,38.13.05c1.19,0,2.28.11,3.48.22,3.48.54,6.08,2.28,8.04,5.43,1.85,3.15,2.72,6.63,3.58,10.1,1.41,5.65,2.61,11.41,4.02,17.16.76,3.04,1.52,6.08,2.5,9.02.76,2.17,1.96,4.24,3.8,5.65,4.78,3.58,11.19,1.96,14.12-3.58,1.3-2.17,4.34-16.29,7.93-31.72.87-3.91,2.17-7.39,5.43-9.78,5.87-4.45,12.71-1.41,14.99,2.5.87,1.41,1.52,3.04,1.74,4.67.43,2.82.76,5.54.76,8.36.11,23.14.11,65.28.11,76.14Z"/>
           </svg>
@@ -603,6 +624,7 @@ export default function Sidebar({
             section={section}
             isExpanded={isExpanded}
             defaultOpen={i === 0}
+            onNavigate={() => setIsNavigating(true)}
           />
         ))}
       </nav>

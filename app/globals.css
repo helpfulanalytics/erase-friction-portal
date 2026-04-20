@@ -174,3 +174,18 @@
   --highlight: oklch(0.852 0.199 91.936);
   --brand: oklch(0.78 0.17 74); /* #f59e0b amber */ --destructive-foreground: var(--color-red-600); --success: var(--color-emerald-500); --success-foreground: var(--color-emerald-600); --info: var(--color-violet-500); --info-foreground: var(--color-violet-600); --warning: var(--color-yellow-500); --warning-foreground: var(--color-yellow-600); --invert: var(--color-zinc-700); --invert-foreground: var(--color-zinc-50);
 }
+
+@keyframes logo-pulse {
+  0%, 100% {
+    filter: drop-shadow(0 0 6px rgba(245, 158, 11, 0.35));
+    opacity: 1;
+  }
+  50% {
+    filter: drop-shadow(0 0 16px rgba(245, 158, 11, 0.9));
+    opacity: 0.75;
+  }
+}
+
+.logo-loading {
+  animation: logo-pulse 0.9s ease-in-out infinite;
+}
