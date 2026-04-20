@@ -7,7 +7,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "push:indexes": "bash scripts/push-firestore-indexes.sh",
+    "firebase:login": "npx --yes firebase-tools@13 login"
   },
   "dependencies": {
     "@ai-sdk/gateway": "^3.0.104",
