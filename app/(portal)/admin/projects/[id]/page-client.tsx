@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatDistanceToNowStrict, startOfMonth, startOfWeek, addDays, format } from "date-fns";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ActivityFeedItem } from "@/components/dashboard/ActivityFeedItem";
@@ -11,6 +11,10 @@ import { InvoiceDetailSheet, type Invoice } from "@/components/invoices/InvoiceD
 import { CreateInvoiceModal } from "@/components/invoices/CreateInvoiceModal";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { resolveUserAvatarUrl } from "@/lib/user-avatar-url";
 
 type Event = {
   id: string;
@@ -29,11 +33,30 @@ async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
   return data as T;
 }
 
+type ProjectMemberRow = {
+  membershipId: string;
+  userId: string;
+  email: string;
+  name: string;
+  role: string;
+  avatar?: string;
+};
+
+function memberInitials(name: string, email: string) {
+  const n = (name.trim() || email.trim() || "?").replace(/\s+/g, " ");
+  const parts = n.split(" ").filter(Boolean);
+  if (parts.length >= 2) {
+    return (parts[0]![0]! + parts[1]![0]!).toUpperCase();
+  }
+  return n.slice(0, 2).toUpperCase() || "?";
+}
+
 function ymd(d: Date) {
   return format(d, "yyyy-MM-dd");
 }
 
 export default function AdminProjectOverview({ projectId }: { projectId: string }) {
+  const queryClient = useQueryClient();
   const q = useQuery({
     queryKey: ["activity", "project", projectId],
     queryFn: () => fetchJson<{ events: Event[] }>(`/api/projects/${projectId}/activity?limit=200`),
@@ -43,6 +66,24 @@ export default function AdminProjectOverview({ projectId }: { projectId: string 
     queryKey: ["admin-team"],
     queryFn: () => fetchJson<{ users: { id: string; name?: string; email?: string }[]; projects: { id: string; name?: string }[] }>("/api/admin/team"),
   });
+
+  const membersQ = useQuery({
+    queryKey: ["project-members", projectId],
+    queryFn: () => fetchJson<{ members: ProjectMemberRow[] }>(`/api/projects/${projectId}/members`),
+  });
+
+  const memberUserIds = React.useMemo(() => {
+    return new Set((membersQ.data?.members ?? []).map((m) => m.userId));
+  }, [membersQ.data?.members]);
+
+  const [pickUserId, setPickUserId] = React.useState<string>("");
+  const [inviteEmail, setInviteEmail] = React.useState("");
+  const [inviteRole, setInviteRole] = React.useState<"ADMIN" | "CLIENT">("CLIENT");
+  const [addingMember, setAddingMember] = React.useState(false);
+
+  const teamUsersNotOnProject = React.useMemo(() => {
+    return (teamQ.data?.users ?? []).filter((u) => !memberUserIds.has(u.id));
+  }, [teamQ.data?.users, memberUserIds]);
 
   const usersById = React.useMemo(() => {
     const map = new Map<string, string>();
@@ -174,6 +215,179 @@ export default function AdminProjectOverview({ projectId }: { projectId: string 
             </div>
           </div>
         </div>
+        </div>
+
+        <div className="rounded-xl border border-border bg-surface p-4">
+          <div className="font-ui text-xs font-semibold tracking-widest uppercase text-muted-foreground">
+            People
+          </div>
+
+          <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+            <select
+              className="h-8 min-w-0 flex-1 rounded-lg border border-border bg-subtle px-2 font-ui text-sm text-ink sm:max-w-[240px]"
+              value={pickUserId}
+              onChange={(e) => setPickUserId(e.target.value)}
+              disabled={teamQ.isLoading || teamUsersNotOnProject.length === 0}
+            >
+              <option value="">
+                {teamUsersNotOnProject.length === 0 ? "No users to add" : "Add existing…"}
+              </option>
+              {teamUsersNotOnProject.map((u) => {
+                const label =
+                  u.email && (u.name ?? u.email) !== u.email
+                    ? `${u.name ?? u.email} · ${u.email}`
+                    : (u.name ?? u.email ?? u.id);
+                return (
+                  <option key={u.id} value={u.id}>
+                    {label}
+                  </option>
+                );
+              })}
+            </select>
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              className="font-ui"
+              disabled={!pickUserId || addingMember}
+              onClick={async () => {
+                if (!pickUserId) return;
+                setAddingMember(true);
+                try {
+                  await fetchJson(`/api/projects/${projectId}/members`, {
+                    method: "POST",
+                    headers: { "content-type": "application/json" },
+                    body: JSON.stringify({ userId: pickUserId }),
+                  });
+                  toast.success("User added to project.");
+                  setPickUserId("");
+                  await queryClient.invalidateQueries({ queryKey: ["project-members", projectId] });
+                  await queryClient.invalidateQueries({ queryKey: ["admin-team"] });
+                } catch (err) {
+                  toast.error(err instanceof Error ? err.message : "Could not add user");
+                } finally {
+                  setAddingMember(false);
+                }
+              }}
+            >
+              Add
+            </Button>
+            <span className="hidden h-6 w-px bg-border sm:block" aria-hidden />
+            <Input
+              className="h-8 min-w-0 flex-1 font-ui text-sm sm:max-w-[220px]"
+              type="email"
+              autoComplete="email"
+              placeholder="Invite by email"
+              value={inviteEmail}
+              onChange={(e) => setInviteEmail(e.target.value)}
+            />
+            <select
+              className="h-8 w-full rounded-lg border border-border bg-subtle px-2 font-ui text-sm text-ink sm:w-[100px]"
+              value={inviteRole}
+              onChange={(e) => setInviteRole(e.target.value === "ADMIN" ? "ADMIN" : "CLIENT")}
+            >
+              <option value="CLIENT">Client</option>
+              <option value="ADMIN">Admin</option>
+            </select>
+            <Button
+              type="button"
+              size="sm"
+              className="font-ui"
+              disabled={!inviteEmail.trim() || addingMember}
+              onClick={async () => {
+                setAddingMember(true);
+                try {
+                  await fetchJson(`/api/projects/${projectId}/members`, {
+                    method: "POST",
+                    headers: { "content-type": "application/json" },
+                    body: JSON.stringify({
+                      email: inviteEmail.trim(),
+                      name: "",
+                      company: "",
+                      role: inviteRole,
+                    }),
+                  });
+                  toast.success("Invite sent.");
+                  setInviteEmail("");
+                  await queryClient.invalidateQueries({ queryKey: ["project-members", projectId] });
+                  await queryClient.invalidateQueries({ queryKey: ["admin-team"] });
+                } catch (err) {
+                  toast.error(err instanceof Error ? err.message : "Invite failed");
+                } finally {
+                  setAddingMember(false);
+                }
+              }}
+            >
+              Invite
+            </Button>
+          </div>
+
+          <div className="mt-4 font-ui text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            Members
+          </div>
+          <div className="mt-2 max-h-64 overflow-y-auto pr-1">
+            {membersQ.isLoading ? (
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                {[0, 1].map((i) => (
+                  <div
+                    key={i}
+                    className="flex items-center gap-3 rounded-xl border border-border bg-subtle/40 p-3"
+                  >
+                    <Skeleton className="size-10 shrink-0 rounded-full" />
+                    <div className="min-w-0 flex-1 space-y-2">
+                      <Skeleton className="h-4 w-3/4" />
+                      <Skeleton className="h-3 w-1/2" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : membersQ.error ? (
+              <div className="rounded-xl border border-border bg-subtle/40 p-4 font-ui text-sm text-destructive">
+                {(membersQ.error as Error).message}
+              </div>
+            ) : (membersQ.data?.members?.length ?? 0) === 0 ? (
+              <div className="rounded-xl border border-dashed border-border bg-subtle/30 p-6 text-center font-ui text-sm text-muted-foreground">
+                No members yet.
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                {membersQ.data!.members.map((m) => {
+                  const avatarUrl = resolveUserAvatarUrl(m.avatar, m.userId);
+                  return (
+                    <div
+                      key={m.membershipId}
+                      className="flex min-w-0 items-center gap-3 rounded-xl border border-border bg-subtle/40 p-3 shadow-sm"
+                    >
+                      <Avatar size="lg" className="size-10 shrink-0">
+                        <AvatarImage src={avatarUrl} alt={m.name} />
+                        <AvatarFallback className="font-ui text-xs font-semibold">
+                          {memberInitials(m.name, m.email)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="min-w-0 flex-1">
+                        <div className="truncate font-ui text-sm font-semibold text-ink">{m.name}</div>
+                        <div className="truncate font-ui text-xs text-muted-foreground">
+                          {m.email || m.userId}
+                        </div>
+                      </div>
+                      <span
+                        className={cn(
+                          "shrink-0 rounded-full border px-2 py-0.5 font-ui text-[10px] font-bold uppercase tracking-wide",
+                          m.role === "ADMIN"
+                            ? "border-amber-300 bg-amber-50 text-amber-900"
+                            : m.role === "DEV"
+                              ? "border-violet-300 bg-violet-50 text-violet-900"
+                              : "border-border bg-surface text-muted-foreground"
+                        )}
+                      >
+                        {m.role}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="rounded-xl border border-border bg-surface p-5 shadow-card">
