@@ -48,12 +48,21 @@ export async function POST(
   await adminAuth.setCustomUserClaims(userRecord.uid, { role: invite.role });
 
   // Write/Update Firestore user doc
-  await adminDb.collection("users").doc(userRecord.uid).set({
-    email:     invite.email,
-    name,
-    role:      invite.role,
-    company:   invite.company,
-  }, { merge: true });
+  const userRef = adminDb.collection("users").doc(userRecord.uid);
+  const existingUserSnap = await userRef.get();
+  const existing = (existingUserSnap.data() as Record<string, unknown> | undefined) ?? {};
+  const createdAt = existing.createdAt ?? Timestamp.now();
+
+  await userRef.set(
+    {
+      email: invite.email,
+      name,
+      role: invite.role,
+      company: invite.company,
+      createdAt,
+    },
+    { merge: true }
+  );
 
   // Write projectMembers docs
   const batch = adminDb.batch();

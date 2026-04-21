@@ -1,30 +1,28 @@
 import * as React from 'react';
 
-import type { OurFileRouter } from '@/lib/uploadthing';
-import type {
-  ClientUploadedFileData,
-  UploadFilesOptions,
-} from 'uploadthing/types';
-
-import { generateReactHelpers } from '@uploadthing/react';
 import { toast } from 'sonner';
 import { z } from 'zod';
 
-export type UploadedFile<T = unknown> = ClientUploadedFileData<T>;
+export type UploadedFile<T = unknown> = {
+  key?: string;
+  appUrl?: string;
+  name: string;
+  size: number;
+  type: string;
+  url: string;
+} & T;
 
-interface UseUploadFileProps
-  extends Pick<
-    UploadFilesOptions<OurFileRouter['editorUploader']>,
-    'headers' | 'onUploadBegin' | 'onUploadProgress' | 'skipPolling'
-  > {
+interface UseUploadFileProps {
+  /** Used to upload into a doc-specific Drive folder */
+  docId?: string;
   onUploadComplete?: (file: UploadedFile) => void;
   onUploadError?: (error: unknown) => void;
 }
 
 export function useUploadFile({
+  docId,
   onUploadComplete,
   onUploadError,
-  ...props
 }: UseUploadFileProps = {}) {
   const [uploadedFile, setUploadedFile] = React.useState<UploadedFile>();
   const [uploadingFile, setUploadingFile] = React.useState<File>();
@@ -36,19 +34,33 @@ export function useUploadFile({
     setUploadingFile(file);
 
     try {
-      const res = await uploadFiles('editorUploader', {
-        ...props,
-        files: [file],
-        onUploadProgress: ({ progress }) => {
-          setProgress(Math.min(progress, 100));
-        },
+      if (!docId) throw new Error('Missing docId for upload.');
+
+      const form = new FormData();
+      form.set('docId', docId);
+      form.set('file', file);
+
+      const res = await fetch('/api/uploads/editor-file', {
+        method: 'POST',
+        body: form,
+        credentials: 'include',
       });
 
-      setUploadedFile(res[0]);
+      const data = (await res.json()) as { url?: string; driveFileId?: string; error?: string };
+      if (!res.ok) throw new Error(data.error ?? 'Upload failed');
 
-      onUploadComplete?.(res[0]);
+      const uploaded: UploadedFile = {
+        key: data.driveFileId,
+        name: file.name,
+        size: file.size,
+        type: file.type,
+        url: String(data.url ?? ''),
+      };
 
-      return uploadedFile;
+      setProgress(100);
+      setUploadedFile(uploaded);
+      onUploadComplete?.(uploaded);
+      return uploaded;
     } catch (error) {
       const errorMessage = getErrorMessage(error);
 
@@ -103,9 +115,6 @@ export function useUploadFile({
     uploadingFile,
   };
 }
-
-export const { uploadFiles, useUploadThing } =
-  generateReactHelpers<OurFileRouter>();
 
 export function getErrorMessage(err: unknown) {
   const unknownError = 'Something went wrong, please try again later.';

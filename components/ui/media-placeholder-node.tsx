@@ -56,7 +56,9 @@ export const PlaceholderElement = withHOC(
     const { api } = useEditorPlugin(PlaceholderPlugin);
 
     const { isUploading, progress, uploadedFile, uploadFile, uploadingFile } =
-      useUploadFile();
+      useUploadFile({
+        docId: String((editor as unknown as { id?: string }).id ?? '') || undefined,
+      });
 
     const loading = isUploading && uploadingFile;
 

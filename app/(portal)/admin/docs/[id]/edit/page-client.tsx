@@ -103,18 +103,38 @@ export default function AdminDocEditor({ docId }: { docId: string }) {
     },
   });
 
-  // Debounced autosave every 30s after changes
+  // Debounced autosave shortly after changes so edits persist quickly.
   useDebouncedCallback(
     () => {
       if (!dirty) return;
       autosave.mutate();
     },
-    30_000,
+    1500,
     [dirty, title, type, status, content]
   );
 
+  // Warn on navigation/refresh if there are unsaved changes.
+  React.useEffect(() => {
+    function onBeforeUnload(e: BeforeUnloadEvent) {
+      if (!dirty) return;
+      e.preventDefault();
+      e.returnValue = "";
+    }
+    window.addEventListener("beforeunload", onBeforeUnload);
+    return () => window.removeEventListener("beforeunload", onBeforeUnload);
+  }, [dirty]);
+
   const snapshot = useMutation({
     mutationFn: async () => {
+      // Ensure the latest title/content is persisted before snapshotting.
+      if (dirty) {
+        await fetchJson(`/api/docs/${docId}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ title, type, status, content }),
+        });
+        setDirty(false);
+      }
       await fetchJson(`/api/docs/${docId}/versions`, { method: "POST" });
     },
     onSuccess: async () => {
@@ -125,6 +145,15 @@ export default function AdminDocEditor({ docId }: { docId: string }) {
 
   const requestApproval = useMutation({
     mutationFn: async () => {
+      // Ensure the latest title/content is persisted before requesting approval.
+      if (dirty) {
+        await fetchJson(`/api/docs/${docId}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ title, type, status, content }),
+        });
+        setDirty(false);
+      }
       await fetchJson(`/api/docs/${docId}/request-approval`, { method: "POST" });
     },
     onSuccess: async () => {
