@@ -45,6 +45,13 @@ export default async function PortalLayout({
         activeProjectId={projects[0]?.id}
         userName={user?.name ?? session.email}
         userAvatar={user?.avatar}
+        userAvatarGender={
+          user?.avatarGender === "male" ||
+          user?.avatarGender === "female" ||
+          user?.avatarGender === "neutral"
+            ? user.avatarGender
+            : undefined
+        }
         userId={session.uid}
       />
 

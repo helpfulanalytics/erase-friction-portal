@@ -18,6 +18,15 @@ export async function assertProjectMember(session: SessionPayload, projectId: st
   }
 }
 
+/**
+ * Same as {@link assertProjectMember}, but **ADMIN** and **DEV** may access any project
+ * (admin UI) without a `projectMembers` row. Clients must still be members.
+ */
+export async function assertProjectMemberOrStaff(session: SessionPayload, projectId: string) {
+  if (session.role === "ADMIN" || session.role === "DEV") return;
+  await assertProjectMember(session, projectId);
+}
+
 export function assertAdmin(session: SessionPayload) {
   if (session.role !== "ADMIN") {
     const err = new Error("Forbidden");

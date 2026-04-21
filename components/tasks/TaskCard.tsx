@@ -99,7 +99,9 @@ export function TaskCard({
             <div className="flex items-center gap-3">
               {assignee && (
                 <img
-                  src={resolveUserAvatarUrl(assignee.avatar, assignee.id)}
+                  src={resolveUserAvatarUrl(assignee.avatar, assignee.id, {
+                    gender: assignee.avatarGender,
+                  })}
                   alt=""
                   className="h-5 w-5 rounded-full border border-border object-cover"
                 />

@@ -30,12 +30,16 @@ import {
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { resolveUserAvatarUrl } from "@/lib/user-avatar-url";
+import type { UserAvatarGender } from "@/types/models";
 import { NotificationDropdown } from "@/components/notifications/NotificationDropdown";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuGroup,
+  DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -468,6 +472,8 @@ interface SidebarProps {
   activeProjectId?: string;
   userName?:        string;
   userAvatar?:      string;
+  /** Biases DiceBear when no custom photo is set. */
+  userAvatarGender?: UserAvatarGender;
   userId?:          string;
 }
 
@@ -477,11 +483,19 @@ export default function Sidebar({
   activeProjectId,
   userName        = "User",
   userAvatar,
+  userAvatarGender,
   userId,
 }: SidebarProps) {
   const [hovered, setHovered] = React.useState(false);
   const [pinned,  setPinned]  = React.useState(false);
   const [isNavigating, setIsNavigating] = React.useState(false);
+  const [avatarGender, setAvatarGender] = React.useState<UserAvatarGender>(
+    userAvatarGender ?? "neutral"
+  );
+
+  React.useEffect(() => {
+    setAvatarGender(userAvatarGender ?? "neutral");
+  }, [userAvatarGender]);
 
   const pathname = usePathname();
   const prevPathnameRef = React.useRef(pathname);
@@ -508,6 +522,22 @@ export default function Sidebar({
     .join("")
     .slice(0, 2)
     .toUpperCase();
+
+  async function onAvatarGenderChange(next: UserAvatarGender) {
+    const prev = avatarGender;
+    setAvatarGender(next);
+    try {
+      const res = await fetch("/api/me", {
+        method: "PATCH",
+        credentials: "include",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ avatarGender: next }),
+      });
+      if (!res.ok) throw new Error("Failed to save");
+    } catch {
+      setAvatarGender(prev);
+    }
+  }
 
   return (
     <aside
@@ -670,7 +700,8 @@ export default function Sidebar({
           >
             <Avatar className="size-7 shrink-0 ring-1 ring-white/10">
               <AvatarImage
-                src={resolveUserAvatarUrl(userAvatar, userId ?? userName)}
+                key={`${userId ?? ""}-${avatarGender}`}
+                src={resolveUserAvatarUrl(userAvatar, userId ?? userName, { gender: avatarGender })}
                 alt={userName}
               />
               <AvatarFallback className="bg-zinc-800 text-[11px] font-ui font-semibold text-zinc-300">
@@ -705,6 +736,33 @@ export default function Sidebar({
                 {role === "ADMIN" ? "Administrator" : role === "DEV" ? "Developer" : "Client"}
               </p>
             </div>
+            <DropdownMenuSeparator className="bg-white/[0.06]" />
+            <DropdownMenuLabel className="px-2 py-1.5 text-[10px] font-semibold uppercase tracking-widest text-zinc-600">
+              DiceBear look (no photo)
+            </DropdownMenuLabel>
+            <DropdownMenuRadioGroup
+              value={avatarGender}
+              onValueChange={(v) => void onAvatarGenderChange(v as UserAvatarGender)}
+            >
+              <DropdownMenuRadioItem
+                value="neutral"
+                className="cursor-pointer rounded-md px-2 py-1.5 text-[13px] text-zinc-300 focus:bg-white/[0.06]"
+              >
+                Balanced
+              </DropdownMenuRadioItem>
+              <DropdownMenuRadioItem
+                value="female"
+                className="cursor-pointer rounded-md px-2 py-1.5 text-[13px] text-zinc-300 focus:bg-white/[0.06]"
+              >
+                Feminine
+              </DropdownMenuRadioItem>
+              <DropdownMenuRadioItem
+                value="male"
+                className="cursor-pointer rounded-md px-2 py-1.5 text-[13px] text-zinc-300 focus:bg-white/[0.06]"
+              >
+                Masculine
+              </DropdownMenuRadioItem>
+            </DropdownMenuRadioGroup>
             <DropdownMenuSeparator className="bg-white/[0.06]" />
             <DropdownMenuItem className="cursor-pointer gap-2 rounded-md px-2 py-1.5 text-[13px] text-zinc-400 focus:bg-white/[0.06]">
               <Settings className="size-3.5" />

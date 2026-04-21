@@ -15,6 +15,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { resolveUserAvatarUrl } from "@/lib/user-avatar-url";
+import type { UserAvatarGender } from "@/types/models";
+import { AddWorkspaceUserPicker } from "@/components/admin/AddWorkspaceUserPicker";
 
 type Event = {
   id: string;
@@ -40,6 +42,7 @@ type ProjectMemberRow = {
   name: string;
   role: string;
   avatar?: string;
+  avatarGender?: UserAvatarGender;
 };
 
 function memberInitials(name: string, email: string) {
@@ -64,7 +67,11 @@ export default function AdminProjectOverview({ projectId }: { projectId: string 
 
   const teamQ = useQuery({
     queryKey: ["admin-team"],
-    queryFn: () => fetchJson<{ users: { id: string; name?: string; email?: string }[]; projects: { id: string; name?: string }[] }>("/api/admin/team"),
+    queryFn: () =>
+      fetchJson<{
+        users: { id: string; name?: string; email?: string; avatar?: string; avatarGender?: UserAvatarGender }[];
+        projects: { id: string; name?: string }[];
+      }>("/api/admin/team"),
   });
 
   const membersQ = useQuery({
@@ -84,6 +91,15 @@ export default function AdminProjectOverview({ projectId }: { projectId: string 
   const teamUsersNotOnProject = React.useMemo(() => {
     return (teamQ.data?.users ?? []).filter((u) => !memberUserIds.has(u.id));
   }, [teamQ.data?.users, memberUserIds]);
+
+  const workspaceUserCount = teamQ.data?.users?.length ?? 0;
+  const addExistingPlaceholder = teamQ.isLoading
+    ? "Loading people…"
+    : workspaceUserCount === 0
+      ? "No accounts in workspace yet"
+      : teamUsersNotOnProject.length === 0
+        ? "Everyone is already on this project"
+        : "Choose someone to add…";
 
   const usersById = React.useMemo(() => {
     const map = new Map<string, string>();
@@ -217,115 +233,126 @@ export default function AdminProjectOverview({ projectId }: { projectId: string 
         </div>
         </div>
 
-        <div className="rounded-xl border border-border bg-surface p-4">
-          <div className="font-ui text-xs font-semibold tracking-widest uppercase text-muted-foreground">
-            People
+        <div className="rounded-2xl border border-border bg-surface p-5 shadow-card">
+          <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <h2 className="font-headingAlt text-lg font-bold tracking-tight text-ink">People</h2>
+              <p className="mt-0.5 max-w-xl font-ui text-sm text-muted-foreground">
+                Add anyone who already has a portal account, or email an invite. New invites only get access to this project once they accept.
+              </p>
+            </div>
           </div>
 
-          <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
-            <select
-              className="h-8 min-w-0 flex-1 rounded-lg border border-border bg-subtle px-2 font-ui text-sm text-ink sm:max-w-[240px]"
-              value={pickUserId}
-              onChange={(e) => setPickUserId(e.target.value)}
-              disabled={teamQ.isLoading || teamUsersNotOnProject.length === 0}
-            >
-              <option value="">
-                {teamUsersNotOnProject.length === 0 ? "No users to add" : "Add existing…"}
-              </option>
-              {teamUsersNotOnProject.map((u) => {
-                const label =
-                  u.email && (u.name ?? u.email) !== u.email
-                    ? `${u.name ?? u.email} · ${u.email}`
-                    : (u.name ?? u.email ?? u.id);
-                return (
-                  <option key={u.id} value={u.id}>
-                    {label}
-                  </option>
-                );
-              })}
-            </select>
-            <Button
-              type="button"
-              size="sm"
-              variant="outline"
-              className="font-ui"
-              disabled={!pickUserId || addingMember}
-              onClick={async () => {
-                if (!pickUserId) return;
-                setAddingMember(true);
-                try {
-                  await fetchJson(`/api/projects/${projectId}/members`, {
-                    method: "POST",
-                    headers: { "content-type": "application/json" },
-                    body: JSON.stringify({ userId: pickUserId }),
-                  });
-                  toast.success("User added to project.");
-                  setPickUserId("");
-                  await queryClient.invalidateQueries({ queryKey: ["project-members", projectId] });
-                  await queryClient.invalidateQueries({ queryKey: ["admin-team"] });
-                } catch (err) {
-                  toast.error(err instanceof Error ? err.message : "Could not add user");
-                } finally {
-                  setAddingMember(false);
-                }
-              }}
-            >
-              Add
-            </Button>
-            <span className="hidden h-6 w-px bg-border sm:block" aria-hidden />
-            <Input
-              className="h-8 min-w-0 flex-1 font-ui text-sm sm:max-w-[220px]"
-              type="email"
-              autoComplete="email"
-              placeholder="Invite by email"
-              value={inviteEmail}
-              onChange={(e) => setInviteEmail(e.target.value)}
-            />
-            <select
-              className="h-8 w-full rounded-lg border border-border bg-subtle px-2 font-ui text-sm text-ink sm:w-[100px]"
-              value={inviteRole}
-              onChange={(e) => setInviteRole(e.target.value === "ADMIN" ? "ADMIN" : "CLIENT")}
-            >
-              <option value="CLIENT">Client</option>
-              <option value="ADMIN">Admin</option>
-            </select>
-            <Button
-              type="button"
-              size="sm"
-              className="font-ui"
-              disabled={!inviteEmail.trim() || addingMember}
-              onClick={async () => {
-                setAddingMember(true);
-                try {
-                  await fetchJson(`/api/projects/${projectId}/members`, {
-                    method: "POST",
-                    headers: { "content-type": "application/json" },
-                    body: JSON.stringify({
-                      email: inviteEmail.trim(),
-                      name: "",
-                      company: "",
-                      role: inviteRole,
-                    }),
-                  });
-                  toast.success("Invite sent.");
-                  setInviteEmail("");
-                  await queryClient.invalidateQueries({ queryKey: ["project-members", projectId] });
-                  await queryClient.invalidateQueries({ queryKey: ["admin-team"] });
-                } catch (err) {
-                  toast.error(err instanceof Error ? err.message : "Invite failed");
-                } finally {
-                  setAddingMember(false);
-                }
-              }}
-            >
-              Invite
-            </Button>
+          <div className="mt-5 grid gap-4 md:grid-cols-2">
+            <div className="rounded-xl border border-border bg-subtle/35 p-4">
+              <div className="font-ui text-xs font-bold uppercase tracking-wider text-ink/80">Add existing</div>
+              <p className="mt-1 font-ui text-xs text-muted-foreground">
+                Pick from everyone in your workspace.
+              </p>
+              <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-stretch">
+                <AddWorkspaceUserPicker
+                  users={teamUsersNotOnProject}
+                  value={pickUserId}
+                  onChange={setPickUserId}
+                  disabled={teamQ.isLoading || teamUsersNotOnProject.length === 0}
+                  placeholder={addExistingPlaceholder}
+                />
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  className="h-9 shrink-0 px-4 font-ui font-semibold"
+                  disabled={!pickUserId || addingMember}
+                  onClick={async () => {
+                    if (!pickUserId) return;
+                    setAddingMember(true);
+                    try {
+                      await fetchJson(`/api/projects/${projectId}/members`, {
+                        method: "POST",
+                        headers: { "content-type": "application/json" },
+                        body: JSON.stringify({ userId: pickUserId }),
+                      });
+                      toast.success("User added to project.");
+                      setPickUserId("");
+                      await queryClient.invalidateQueries({ queryKey: ["project-members", projectId] });
+                      await queryClient.invalidateQueries({ queryKey: ["admin-team"] });
+                    } catch (err) {
+                      toast.error(err instanceof Error ? err.message : "Could not add user");
+                    } finally {
+                      setAddingMember(false);
+                    }
+                  }}
+                >
+                  Add to project
+                </Button>
+              </div>
+            </div>
+
+            <div className="rounded-xl border border-border bg-subtle/35 p-4">
+              <div className="font-ui text-xs font-bold uppercase tracking-wider text-ink/80">Email invite</div>
+              <p className="mt-1 font-ui text-xs text-muted-foreground">
+                They’ll receive a link to sign up and join this project.
+              </p>
+              <div className="mt-3 flex flex-col gap-2">
+                <Input
+                  className="h-9 font-ui text-sm shadow-sm"
+                  type="email"
+                  autoComplete="email"
+                  placeholder="name@company.com"
+                  value={inviteEmail}
+                  onChange={(e) => setInviteEmail(e.target.value)}
+                />
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                  <select
+                    className="h-9 w-full rounded-lg border border-border bg-surface px-3 font-ui text-sm text-ink shadow-sm outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring/40 sm:w-[140px]"
+                    value={inviteRole}
+                    onChange={(e) => setInviteRole(e.target.value === "ADMIN" ? "ADMIN" : "CLIENT")}
+                  >
+                    <option value="CLIENT">Role: Client</option>
+                    <option value="ADMIN">Role: Admin</option>
+                  </select>
+                  <Button
+                    type="button"
+                    size="sm"
+                    className="h-9 shrink-0 px-4 font-ui font-semibold sm:ml-auto"
+                    disabled={!inviteEmail.trim() || addingMember}
+                    onClick={async () => {
+                      setAddingMember(true);
+                      try {
+                        await fetchJson(`/api/projects/${projectId}/members`, {
+                          method: "POST",
+                          headers: { "content-type": "application/json" },
+                          body: JSON.stringify({
+                            email: inviteEmail.trim(),
+                            name: "",
+                            company: "",
+                            role: inviteRole,
+                          }),
+                        });
+                        toast.success("Invite sent.");
+                        setInviteEmail("");
+                        await queryClient.invalidateQueries({ queryKey: ["project-members", projectId] });
+                        await queryClient.invalidateQueries({ queryKey: ["admin-team"] });
+                      } catch (err) {
+                        toast.error(err instanceof Error ? err.message : "Invite failed");
+                      } finally {
+                        setAddingMember(false);
+                      }
+                    }}
+                  >
+                    Send invite
+                  </Button>
+                </div>
+              </div>
+            </div>
           </div>
 
-          <div className="mt-4 font-ui text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-            Members
+          <div className="mt-6 border-t border-border pt-5">
+            <div className="font-ui text-xs font-bold uppercase tracking-wider text-muted-foreground">
+              On this project
+            </div>
           </div>
-          <div className="mt-2 max-h-64 overflow-y-auto pr-1">
+          <div className="mt-3 max-h-72 overflow-y-auto pr-1">
             {membersQ.isLoading ? (
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                 {[0, 1].map((i) => (
@@ -346,19 +373,21 @@ export default function AdminProjectOverview({ projectId }: { projectId: string 
                 {(membersQ.error as Error).message}
               </div>
             ) : (membersQ.data?.members?.length ?? 0) === 0 ? (
-              <div className="rounded-xl border border-dashed border-border bg-subtle/30 p-6 text-center font-ui text-sm text-muted-foreground">
-                No members yet.
+              <div className="rounded-2xl border border-dashed border-border/80 bg-subtle/20 p-8 text-center font-ui text-sm text-muted-foreground">
+                No one on this project yet. Add someone above or send an invite.
               </div>
             ) : (
-              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 {membersQ.data!.members.map((m) => {
-                  const avatarUrl = resolveUserAvatarUrl(m.avatar, m.userId);
+                  const avatarUrl = resolveUserAvatarUrl(m.avatar, m.userId, {
+                    gender: m.avatarGender,
+                  });
                   return (
                     <div
                       key={m.membershipId}
-                      className="flex min-w-0 items-center gap-3 rounded-xl border border-border bg-subtle/40 p-3 shadow-sm"
+                      className="flex min-w-0 items-center gap-3 rounded-2xl border border-border/90 bg-gradient-to-br from-surface to-subtle/40 p-3.5 shadow-sm ring-1 ring-black/[0.03] dark:ring-white/[0.04]"
                     >
-                      <Avatar size="lg" className="size-10 shrink-0">
+                      <Avatar size="lg" className="size-10 shrink-0 ring-2 ring-border/60">
                         <AvatarImage src={avatarUrl} alt={m.name} />
                         <AvatarFallback className="font-ui text-xs font-semibold">
                           {memberInitials(m.name, m.email)}

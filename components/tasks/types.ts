@@ -16,10 +16,13 @@ export interface Task {
   createdAt?: number;
 }
 
+import type { UserAvatarGender } from "@/types/models";
+
 export interface Assignee {
   id: string;
   name: string;
   avatar?: string;
+  avatarGender?: UserAvatarGender;
 }
 
 export const KANBAN_COLUMNS: Array<{ status: TaskStatus; title: string }> = [

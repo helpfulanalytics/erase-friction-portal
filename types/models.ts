@@ -11,12 +11,17 @@ export interface Timestamp {
 
 export type UserRole = "ADMIN" | "CLIENT" | "DEV";
 
+/** Biases generated DiceBear fallbacks (style-dependent: hair / beard / expressions) — no effect on uploaded photo URLs. */
+export type UserAvatarGender = "male" | "female" | "neutral";
+
 export interface User {
   email:     string;
   name:      string;
   role:      UserRole;
   company:   string;
   avatar:    string;
+  /** Optional — biases generated DiceBear avatars toward a look; omit = neutral. */
+  avatarGender?: UserAvatarGender;
   createdAt: Timestamp;
 }
 

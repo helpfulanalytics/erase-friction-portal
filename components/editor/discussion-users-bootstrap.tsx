@@ -6,20 +6,31 @@ import { useEditorRef, usePluginOption } from 'platejs/react';
 
 import { discussionPlugin } from '@/components/editor/plugins/discussion-kit';
 import { resolveUserAvatarUrl } from '@/lib/user-avatar-url';
+import type { UserAvatarGender } from '@/types/models';
 
-export type DiscussionUsersInput = Record<string, { name: string; avatar?: string }>;
+export type DiscussionUsersInput = Record<
+  string,
+  { name: string; avatar?: string; avatarGender?: UserAvatarGender }
+>;
 
-type Me = { uid: string; email: string; name: string; avatar: string };
+type Me = {
+  uid: string;
+  email: string;
+  name: string;
+  avatar: string;
+  avatarGender?: UserAvatarGender;
+};
 
 function toDiscussionUser(
   id: string,
   name: string,
-  avatar?: string
+  avatar?: string,
+  avatarGender?: UserAvatarGender
 ): { id: string; name: string; avatarUrl: string } {
   return {
     id,
     name: name.trim() || 'User',
-    avatarUrl: resolveUserAvatarUrl(avatar, id),
+    avatarUrl: resolveUserAvatarUrl(avatar, id, { gender: avatarGender }),
   };
 }
 
@@ -57,11 +68,11 @@ export function DiscussionUsersBootstrap({
     if (prefetchedUsers) {
       for (const [id, u] of Object.entries(prefetchedUsers)) {
         if (!id) continue;
-        base[id] = toDiscussionUser(id, u.name, u.avatar);
+        base[id] = toDiscussionUser(id, u.name, u.avatar, u.avatarGender);
       }
     }
 
-    base[me.uid] = toDiscussionUser(me.uid, me.name, me.avatar);
+    base[me.uid] = toDiscussionUser(me.uid, me.name, me.avatar, me.avatarGender);
 
     const ids = new Set<string>();
     for (const d of discussions) {
@@ -90,13 +101,13 @@ export function DiscussionUsersBootstrap({
       if (!res.ok || cancelled) return;
 
       const data = (await res.json()) as {
-        users: Record<string, { name: string; avatar: string }>;
+        users: Record<string, { name: string; avatar: string; avatarGender?: UserAvatarGender }>;
       };
 
       const prev = editor.getOption(discussionPlugin, 'users');
       const merged = { ...prev };
       for (const [id, u] of Object.entries(data.users ?? {})) {
-        merged[id] = toDiscussionUser(id, u.name, u.avatar);
+        merged[id] = toDiscussionUser(id, u.name, u.avatar, u.avatarGender);
       }
 
       editor.setOption(discussionPlugin, 'users', merged);

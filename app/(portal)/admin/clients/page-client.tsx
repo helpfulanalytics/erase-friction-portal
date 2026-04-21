@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { resolveUserAvatarUrl } from "@/lib/user-avatar-url";
+import type { UserAvatarGender } from "@/types/models";
 
 type ClientUser = {
   id: string;
@@ -15,6 +16,7 @@ type ClientUser = {
   company: string;
   role: string;
   avatar: string;
+  avatarGender?: UserAvatarGender;
   createdAt?: number;
   projects: { id: string; name: string }[];
 };
@@ -348,7 +350,7 @@ export default function AdminClientsClient() {
                 >
                   <div className="flex items-start gap-3">
                     <img
-                      src={resolveUserAvatarUrl(c.avatar, c.id || c.email)}
+                      src={resolveUserAvatarUrl(c.avatar, c.id || c.email, { gender: c.avatarGender })}
                       alt=""
                       className="size-10 rounded-full object-cover ring-1 ring-border"
                     />

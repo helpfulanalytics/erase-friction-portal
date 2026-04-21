@@ -3,7 +3,7 @@ export const runtime = "nodejs";
 import { NextResponse } from "next/server";
 import { adminDb } from "@/lib/firebase-admin";
 import { getSessionFromCookie } from "@/lib/server/session-from-cookie";
-import { assertProjectMember } from "@/lib/server/project-access";
+import { assertProjectMemberOrStaff } from "@/lib/server/project-access";
 import { toJsonValue } from "@/lib/server/firestore-serialize";
 
 export async function GET(
@@ -14,7 +14,7 @@ export async function GET(
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { id: projectId } = await params;
-  await assertProjectMember(session, projectId);
+  await assertProjectMemberOrStaff(session, projectId);
 
   const snap = await adminDb
     .collection("invoices")

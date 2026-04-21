@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 import { Timestamp } from "firebase-admin/firestore";
 import { adminDb } from "@/lib/firebase-admin";
 import { getSessionFromCookie } from "@/lib/server/session-from-cookie";
-import { assertAdminOrDev, assertProjectMember } from "@/lib/server/project-access";
+import { assertAdminOrDev, assertProjectMemberOrStaff } from "@/lib/server/project-access";
 import { toJsonValue } from "@/lib/server/firestore-serialize";
 
 const STATUSES = ["TODO", "IN_PROGRESS", "IN_REVIEW", "DONE"] as const;
@@ -24,7 +24,7 @@ export async function GET(
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { id: projectId } = await params;
-  await assertProjectMember(session, projectId);
+  await assertProjectMemberOrStaff(session, projectId);
 
   const snap = await adminDb
     .collection("tasks")
@@ -49,8 +49,21 @@ export async function GET(
   const assignees = userDocs
     .filter((d) => d.exists)
     .map((d) => {
-      const data = d.data() as { name?: string; email?: string; avatar?: string } | undefined;
-      return { id: d.id, name: data?.name ?? data?.email ?? "User", avatar: data?.avatar ?? "" };
+      const data = d.data() as {
+        name?: string;
+        email?: string;
+        avatar?: string;
+        avatarGender?: string;
+      } | undefined;
+      const ag = data?.avatarGender;
+      const avatarGender =
+        ag === "male" || ag === "female" || ag === "neutral" ? ag : undefined;
+      return {
+        id: d.id,
+        name: data?.name ?? data?.email ?? "User",
+        avatar: data?.avatar ?? "",
+        ...(avatarGender ? { avatarGender } : {}),
+      };
     });
 
   return NextResponse.json({
@@ -69,7 +82,7 @@ export async function POST(
   assertAdminOrDev(session);
 
   const { id: projectId } = await params;
-  await assertProjectMember(session, projectId);
+  await assertProjectMemberOrStaff(session, projectId);
 
   const body = await request.json() as {
     title: string;

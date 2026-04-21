@@ -56,6 +56,10 @@ export async function GET() {
       company: data.company ?? "",
       role: data.role ?? "CLIENT",
       avatar: data.avatar ?? "",
+      avatarGender:
+        data.avatarGender === "male" || data.avatarGender === "female" || data.avatarGender === "neutral"
+          ? data.avatarGender
+          : undefined,
       createdAt: data.createdAt,
       projects: userProjectIds.map((pid) => ({ id: pid, name: projectNames.get(pid) ?? pid })),
     };

@@ -11,17 +11,16 @@ export async function GET() {
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   assertAdminOrDev(session);
 
-  const membersSnap = await adminDb.collection("projectMembers").get();
-  const userIds = Array.from(
-    new Set(membersSnap.docs.map((d) => d.data().userId as string).filter(Boolean))
-  );
-
-  const usersDocs = userIds.length
-    ? await adminDb.getAll(...userIds.map((id) => adminDb.collection("users").doc(id)))
-    : [];
-  const users = usersDocs
-    .filter((d) => d.exists)
-    .map((d) => ({ id: d.id, ...(d.data() as Record<string, unknown>) }));
+  // All workspace users (not only those in `projectMembers`, or users with no project yet never appear in pickers).
+  const usersSnap = await adminDb.collection("users").get();
+  type UserRow = { id: string } & Record<string, unknown>;
+  const users = usersSnap.docs
+    .map((d): UserRow => ({ id: d.id, ...(d.data() as Record<string, unknown>) }))
+    .sort((a, b) => {
+      const na = String(a.name ?? a.email ?? a.id).toLowerCase();
+      const nb = String(b.name ?? b.email ?? b.id).toLowerCase();
+      return na.localeCompare(nb);
+    });
 
   const projectsSnap = await adminDb.collection("projects").get();
   const projects = projectsSnap.docs.map((d) => ({ id: d.id, ...(d.data() as Record<string, unknown>) }));

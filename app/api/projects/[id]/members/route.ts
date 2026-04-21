@@ -6,7 +6,12 @@ import { getSessionFromCookie } from "@/lib/server/session-from-cookie";
 import { assertAdmin } from "@/lib/server/project-access";
 import { createAndEmailInvite } from "@/lib/server/create-and-email-invite";
 import { toJsonValue } from "@/lib/server/firestore-serialize";
-import type { UserRole } from "@/types/models";
+import type { UserAvatarGender, UserRole } from "@/types/models";
+
+function parseAvatarGender(v: unknown): UserAvatarGender | undefined {
+  if (v === "male" || v === "female" || v === "neutral") return v;
+  return undefined;
+}
 
 export async function GET(
   _request: Request,
@@ -44,6 +49,7 @@ export async function GET(
       name: String(u?.name ?? u?.email ?? userId),
       role: String(u?.role ?? "CLIENT") as UserRole,
       avatar: String(u?.avatar ?? ""),
+      avatarGender: parseAvatarGender(u?.avatarGender),
     };
   });
 
