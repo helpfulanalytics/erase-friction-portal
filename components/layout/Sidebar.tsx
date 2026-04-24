@@ -88,7 +88,7 @@ const ADMIN_SECTION: NavSection = {
     { href: "/admin/projects",  label: "All Projects", icon: Layers },
     { href: "/admin/clients",   label: "Clients",      icon: Users },
     { href: "/admin/analytics", label: "Analytics",    icon: BarChart2 },
-    { href: "/dev/time",        label: "Time",         icon: Clock },
+    { href: "/admin/time",      label: "Time",         icon: Clock },
     { href: "/admin/dev",       label: "Dev tools",    icon: Wrench },
   ],
 };
@@ -98,7 +98,7 @@ const DEV_SECTION: NavSection = {
   label: "Dev",
   items: [
     { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard, shortcut: "G D" },
-    { href: "/dev/time",  label: "Time",       icon: Clock },
+    { href: "/dashboard/time",  label: "My Time",       icon: Clock },
     { href: "/projects",  label: "Projects",   icon: FolderOpen,     shortcut: "G P" },
     { href: "/messages",  label: "Messages",   icon: MessageSquare,  shortcut: "G M" },
   ],
@@ -154,8 +154,22 @@ function CompactTimer({
   const elapsed = running && startMs ? nowMs - startMs : 0;
 
   function start() {
-    setStartMs(Date.now());
-    setNowMs(Date.now());
+    const startedAtMs = Date.now();
+    fetch("/api/time/active", {
+      method: "POST",
+      credentials: "include",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        userId,
+        projectId,
+        taskId: taskId === "NONE" ? null : taskId,
+        description: desc,
+        startedAtMs,
+      }),
+    }).catch(() => {});
+
+    setStartMs(startedAtMs);
+    setNowMs(startedAtMs);
     setRunning(true);
     setOpen(false);
   }
@@ -166,6 +180,10 @@ function CompactTimer({
     const date = new Date(end).toISOString().slice(0, 10);
     setRunning(false);
     try {
+      await fetch(`/api/time/active?userId=${encodeURIComponent(userId)}`, {
+        method: "DELETE",
+        credentials: "include",
+      }).catch(() => {});
       await fetch("/api/time", {
         method: "POST",
         credentials: "include",
@@ -179,6 +197,7 @@ function CompactTimer({
           endTime: end,
           duration: null,
           date,
+          source: "timer",
         }),
       });
     } finally {
@@ -771,7 +790,10 @@ export default function Sidebar({
             <DropdownMenuSeparator className="bg-white/[0.06]" />
             <DropdownMenuItem
               className="cursor-pointer gap-2 rounded-md px-2 py-1.5 text-[13px] text-red-400 focus:bg-red-500/10 focus:text-red-400"
-              onClick={() => { window.location.href = "/api/auth/signout"; }}
+              onClick={async () => {
+                await fetch("/api/auth/signout", { method: "POST", credentials: "include" });
+                window.location.href = "/auth/signin";
+              }}
             >
               <LogOut className="size-3.5" />
               Sign out

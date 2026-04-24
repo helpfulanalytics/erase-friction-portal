@@ -39,19 +39,21 @@ export async function GET(
   const userDocs = await adminDb.getAll(...userIds.map((uid) => adminDb.collection("users").doc(uid)));
   const byId = new Map(userDocs.filter((d) => d.exists).map((d) => [d.id, d.data() as Record<string, unknown>]));
 
-  const members = snap.docs.map((d) => {
-    const userId = d.data().userId as string;
-    const u = byId.get(userId);
-    return {
-      membershipId: d.id,
-      userId,
-      email: String(u?.email ?? ""),
-      name: String(u?.name ?? u?.email ?? userId),
-      role: String(u?.role ?? "CLIENT") as UserRole,
-      avatar: String(u?.avatar ?? ""),
-      avatarGender: parseAvatarGender(u?.avatarGender),
-    };
-  });
+  const members = snap.docs
+    .filter((d) => byId.has(d.data().userId as string))
+    .map((d) => {
+      const userId = d.data().userId as string;
+      const u = byId.get(userId)!;
+      return {
+        membershipId: d.id,
+        userId,
+        email: String(u.email ?? ""),
+        name: String(u.name ?? u.email ?? ""),
+        role: String(u.role ?? "CLIENT") as UserRole,
+        avatar: String(u.avatar ?? ""),
+        avatarGender: parseAvatarGender(u.avatarGender),
+      };
+    });
 
   return NextResponse.json({ members: toJsonValue(members) });
 }

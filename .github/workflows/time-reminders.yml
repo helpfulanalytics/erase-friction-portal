@@ -1,0 +1,65 @@
+name: Time reminders
+
+on:
+  schedule:
+    - cron: "0 9 * * 1-5"
+    - cron: "0 13 * * 1-5"
+    - cron: "0 18 * * 1-5"
+  workflow_dispatch: {}
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call time reminder endpoint (start)
+        if: github.event.schedule == '0 9 * * 1-5'
+        env:
+          APP_URL: ${{ secrets.APP_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          if [ -z "$APP_URL" ]; then echo "Missing secrets.APP_URL" && exit 1; fi
+          if [ -z "$CRON_SECRET" ]; then echo "Missing secrets.CRON_SECRET" && exit 1; fi
+          curl -sS -X POST "$APP_URL/api/cron/time-reminders" \
+            -H "authorization: Bearer $CRON_SECRET" \
+            -H "content-type: application/json" \
+            --data '{"kind":"start"}'
+
+      - name: Call time reminder endpoint (midday)
+        if: github.event.schedule == '0 13 * * 1-5'
+        env:
+          APP_URL: ${{ secrets.APP_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          if [ -z "$APP_URL" ]; then echo "Missing secrets.APP_URL" && exit 1; fi
+          if [ -z "$CRON_SECRET" ]; then echo "Missing secrets.CRON_SECRET" && exit 1; fi
+          curl -sS -X POST "$APP_URL/api/cron/time-reminders" \
+            -H "authorization: Bearer $CRON_SECRET" \
+            -H "content-type: application/json" \
+            --data '{"kind":"midday"}'
+
+      - name: Call time reminder endpoint (end)
+        if: github.event.schedule == '0 18 * * 1-5'
+        env:
+          APP_URL: ${{ secrets.APP_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          if [ -z "$APP_URL" ]; then echo "Missing secrets.APP_URL" && exit 1; fi
+          if [ -z "$CRON_SECRET" ]; then echo "Missing secrets.CRON_SECRET" && exit 1; fi
+          curl -sS -X POST "$APP_URL/api/cron/time-reminders" \
+            -H "authorization: Bearer $CRON_SECRET" \
+            -H "content-type: application/json" \
+            --data '{"kind":"end"}'
+
+      - name: Manual run (midday)
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          APP_URL: ${{ secrets.APP_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          if [ -z "$APP_URL" ]; then echo "Missing secrets.APP_URL" && exit 1; fi
+          if [ -z "$CRON_SECRET" ]; then echo "Missing secrets.CRON_SECRET" && exit 1; fi
+          curl -sS -X POST "$APP_URL/api/cron/time-reminders" \
+            -H "authorization: Bearer $CRON_SECRET" \
+            -H "content-type: application/json" \
+            --data '{"kind":"midday","dryRun":true}'
+

@@ -2,17 +2,11 @@
 
 import * as React from "react";
 import { Trash2, Save } from "lucide-react";
+import type { TimeEntry, WithId } from "@/types/models";
 
 type User = { id: string; name?: string; email?: string };
 type Project = { id: string; name?: string };
-type Entry = {
-  id: string;
-  userId: string;
-  projectId: string;
-  description?: string;
-  duration: number;
-  date: string;
-};
+type Entry = WithId<TimeEntry>;
 
 function minsToHHMM(mins: number) {
   const m = Math.max(0, Math.round(mins || 0));

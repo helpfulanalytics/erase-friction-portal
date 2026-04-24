@@ -7,19 +7,11 @@ import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import { TimesheetGrid } from "@/components/time/TimesheetGrid";
 import { TimeEntryRow } from "@/components/time/TimeEntryRow";
+import type { TimeEntry, WithId } from "@/types/models";
 
 type User = { id: string; name?: string; email?: string };
 type Project = { id: string; name?: string };
-type Entry = {
-  id: string;
-  userId: string;
-  projectId: string;
-  taskId?: string | null;
-  description?: string;
-  duration: number;
-  date: string; // YYYY-MM-DD
-  createdAt?: number;
-};
+type Entry = WithId<TimeEntry>;
 
 async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
   const res = await fetch(url, { credentials: "include", ...init });
@@ -46,6 +38,15 @@ export default function AdminTimeClient() {
   const teamQ = useQuery({
     queryKey: ["admin-team"],
     queryFn: () => fetchJson<{ users: User[]; projects: Project[] }>("/api/admin/team"),
+  });
+
+  const activeQ = useQuery({
+    queryKey: ["time-active"],
+    queryFn: () => fetchJson<{ timers: Array<{ id: string; userId: string; projectId: string; description?: string; updatedAt?: unknown }> }>(
+      "/api/time/active"
+    ),
+    refetchInterval: 15_000,
+    enabled: teamQ.isSuccess,
   });
 
   const timeQ = useQuery({
@@ -85,6 +86,15 @@ export default function AdminTimeClient() {
   const users = teamQ.data?.users ?? [];
   const projects = teamQ.data?.projects ?? [];
   const entries = timeQ.data?.entries ?? [];
+  const activeTimers = activeQ.data?.timers ?? [];
+
+  const userLabel = (uid: string) =>
+    users.find((u) => u.id === uid)?.name ??
+    users.find((u) => u.id === uid)?.email ??
+    uid;
+  const projectLabel = (pid: string) =>
+    projects.find((p) => p.id === pid)?.name ??
+    pid;
 
   return (
     <div className="space-y-6">
@@ -105,6 +115,37 @@ export default function AdminTimeClient() {
         </div>
       ) : (
         <>
+          {activeTimers.length ? (
+            <div className="rounded-xl border border-border bg-surface p-4 shadow-card">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="font-ui text-xs font-semibold tracking-widest uppercase text-muted-foreground">
+                  Active timers
+                </div>
+                <div className="font-ui text-xs text-muted-foreground">
+                  Refreshes every 15 seconds
+                </div>
+              </div>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {activeTimers.map((t) => (
+                  <div
+                    key={t.id}
+                    className="inline-flex items-center gap-2 rounded-full border border-border bg-subtle px-3 py-1"
+                    title={t.description ?? ""}
+                  >
+                    <span className="relative inline-flex h-2 w-2 rounded-full bg-brand" />
+                    <span className="font-ui text-xs font-semibold text-ink">
+                      {userLabel(t.userId)}
+                    </span>
+                    <span className="font-ui text-xs text-muted-foreground">•</span>
+                    <span className="font-ui text-xs text-muted-foreground">
+                      {projectLabel(t.projectId)}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : null}
+
           <TimesheetGrid
             weekStart={weekStart}
             onWeekChange={setWeekStart}

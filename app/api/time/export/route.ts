@@ -18,9 +18,16 @@ export async function GET(request: Request) {
   const to = parseDateYYYYMMDD(url.searchParams.get("to"));
   const limit = clampLimit(Number(url.searchParams.get("limit") ?? 2000) || 2000, 1, 5000);
 
+  const effectiveUserId =
+    session.role === "ADMIN" ? (userId ? String(userId).trim() : null) : session.uid;
+
+  if (session.role !== "ADMIN" && userId && String(userId).trim() !== session.uid) {
+    return new NextResponse("Forbidden", { status: 403 });
+  }
+
   let q: FirebaseFirestore.Query = adminDb.collection("timeEntries");
   if (projectId) q = q.where("projectId", "==", projectId);
-  if (userId) q = q.where("userId", "==", userId);
+  if (effectiveUserId) q = q.where("userId", "==", effectiveUserId);
   if (from) q = q.where("date", ">=", from);
   if (to) q = q.where("date", "<=", to);
 
@@ -55,7 +62,22 @@ export async function GET(request: Request) {
   }
 
   const rows: string[][] = [
-    ["Date", "Member", "Project", "Task", "Description", "Duration (mins)", "Duration (hrs)"],
+    [
+      "Date",
+      "Member",
+      "Project",
+      "Task",
+      "Description",
+      "Duration (mins)",
+      "Duration (hrs)",
+      "Source",
+      "Repo",
+      "Branch",
+      "Commit SHA",
+      "Commit URL",
+      "PR #",
+      "PR URL",
+    ],
   ];
 
   for (const e of entries) {
@@ -69,6 +91,13 @@ export async function GET(request: Request) {
       String(e.description ?? ""),
       String(mins),
       String(hrs),
+      String(e.source ?? ""),
+      String(e.repoFullName ?? ""),
+      String(e.branchName ?? ""),
+      String(e.commitSha ?? ""),
+      String(e.commitUrl ?? ""),
+      e.prNumber === null || e.prNumber === undefined ? "" : String(e.prNumber),
+      String(e.prUrl ?? ""),
     ]);
   }
 

@@ -4,10 +4,11 @@ import * as React from "react";
 import { addDays, format, isSameDay, startOfWeek } from "date-fns";
 import { ChevronLeft, ChevronRight, Download } from "lucide-react";
 import { cn } from "@/lib/utils";
+import type { TimeEntry } from "@/types/models";
 
 type User = { id: string; name?: string; email?: string };
 type Project = { id: string; name?: string };
-type Entry = { userId: string; projectId: string; duration: number; date: string };
+type Entry = Pick<TimeEntry, "userId" | "projectId" | "duration" | "date">;
 
 function hours(mins: number) {
   return mins / 60;

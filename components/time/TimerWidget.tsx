@@ -35,10 +35,12 @@ export function TimerWidget({
   userId,
   projects,
   defaultProjectId,
+  className,
 }: {
   userId: string;
   projects: Project[];
   defaultProjectId?: string | null;
+  className?: string;
 }) {
   const [running, setRunning] = React.useState(false);
   const [startMs, setStartMs] = React.useState<number | null>(null);
@@ -73,6 +75,23 @@ export function TimerWidget({
     return () => clearInterval(t);
   }, [running]);
 
+  React.useEffect(() => {
+    if (!running) return;
+    const t = setInterval(() => {
+      fetchJson("/api/time/active", {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          userId,
+          projectId,
+          taskId: taskId === "NONE" ? null : taskId,
+          description,
+        }),
+      }).catch(() => {});
+    }, 30_000);
+    return () => clearInterval(t);
+  }, [running, userId, projectId, taskId, description]);
+
   const elapsedMs = running && startMs ? nowMs - startMs : 0;
 
   async function start() {
@@ -80,8 +99,24 @@ export function TimerWidget({
       toast.error("Select a project.");
       return;
     }
-    setStartMs(Date.now());
-    setNowMs(Date.now());
+    const startedAtMs = Date.now();
+    try {
+      await fetchJson("/api/time/active", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          userId,
+          projectId,
+          taskId: taskId === "NONE" ? null : taskId,
+          description,
+          startedAtMs,
+        }),
+      });
+    } catch {
+      // non-blocking: time entry is still the source of truth for payment
+    }
+    setStartMs(startedAtMs);
+    setNowMs(startedAtMs);
     setRunning(true);
   }
 
@@ -91,6 +126,9 @@ export function TimerWidget({
     const date = toYMD(new Date(end));
     setRunning(false);
     try {
+      await fetchJson(`/api/time/active?userId=${encodeURIComponent(userId)}`, { method: "DELETE" }).catch(
+        () => {}
+      );
       await fetchJson("/api/time", {
         method: "POST",
         headers: { "content-type": "application/json" },
@@ -103,6 +141,7 @@ export function TimerWidget({
           endTime: end,
           duration: null,
           date,
+          source: "timer",
         }),
       });
       toast.success("Time entry created.");
@@ -116,7 +155,7 @@ export function TimerWidget({
   }
 
   return (
-    <div className="hidden md:flex items-center gap-2">
+    <div className={cn("flex items-center gap-2", className)}>
       <div className="flex items-center gap-2 rounded-lg border border-border bg-surface px-2 py-1">
         <div className="flex items-center gap-2">
           <span

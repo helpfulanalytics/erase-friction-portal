@@ -7,19 +7,11 @@ import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import { TimesheetGrid } from "@/components/time/TimesheetGrid";
 import { TimeEntryRow } from "@/components/time/TimeEntryRow";
+import type { TimeEntry, WithId } from "@/types/models";
 
 type User = { id: string; name?: string; email?: string };
 type Project = { id: string; name?: string };
-type Entry = {
-  id: string;
-  userId: string;
-  projectId: string;
-  taskId?: string | null;
-  description?: string;
-  duration: number;
-  date: string; // YYYY-MM-DD
-  createdAt?: number;
-};
+type Entry = WithId<TimeEntry>;
 
 async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
   const res = await fetch(url, { credentials: "include", ...init });

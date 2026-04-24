@@ -43,6 +43,49 @@ export interface ProjectMember {
   projectId: string;
 }
 
+// ─── Time Tracking ────────────────────────────────────────────────────────────
+
+export type TimeEntrySource = "manual" | "timer";
+
+export interface TimeEntryGitLink {
+  /** GitHub repository full name, e.g. "org/repo". */
+  repoFullName?: string;
+  /** Commit SHA (40-hex) when linked. */
+  commitSha?: string;
+  commitUrl?: string;
+  /** Pull request number when linked. */
+  prNumber?: number;
+  prUrl?: string;
+  branchName?: string;
+}
+
+export interface TimeEntry extends TimeEntryGitLink {
+  userId:      string;
+  projectId:   string;
+  taskId?:     string | null;
+  description: string;
+  /** Firestore Timestamp or null (timer sessions). */
+  startTime:   Timestamp | null;
+  endTime:     Timestamp | null;
+  /** Duration in minutes (stored as integer). */
+  duration:    number;
+  /** YYYY-MM-DD */
+  date:        string;
+  source?:     TimeEntrySource;
+  createdAt:   Timestamp;
+}
+
+export interface ActiveTimer {
+  userId:      string;
+  projectId:   string;
+  taskId?:     string | null;
+  description: string;
+  startedAt:   Timestamp;
+  updatedAt:   Timestamp;
+}
+
+export type WithId<T> = T & { id: string };
+
 // ─── Invite ──────────────────────────────────────────────────────────────────
 
 export interface Invite {
@@ -81,6 +124,8 @@ export const COLLECTIONS = {
   projects:       "projects",
   projectMembers: "projectMembers",
   invites:        "invites",
+  timeEntries:    "timeEntries",
+  activeTimers:   "activeTimers",
 } as const;
 
 // ─── Documents ────────────────────────────────────────────────────────────────
